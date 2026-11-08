@@ -6,7 +6,7 @@
     { "naam": "Boeketten op bestelling", "intro": "Een boeket voor een verjaardag, een bedankje of zomaar. Laat weten wat je wilt geven." }
   ],
   "producten": [
-    { "naam": "Bruidsboeket", "categorie": "Bruidswerk", "omschrijving": "Een boeket op maat, in de kleuren en bloemen die jij mooi vindt.", "prijs": "vanaf € 00", "foto": "" },
+    { "naam": "Bruidsboeket", "categorie": "Bruidswerk", "omschrijving": "Een boeket op maat, in de kleuren en bloemen die jullie mooi vinden.", "prijs": "vanaf € 00", "foto": "" },
     { "naam": "Corsages en knoopsgatbloemen", "categorie": "Bruidswerk", "omschrijving": "Voor bruidegom, ouders en getuigen.", "prijs": "vanaf € 00", "foto": "" },
     { "naam": "Autobloemstuk", "categorie": "Bruidswerk", "omschrijving": "Een bloemstuk voor op de trouwauto.", "prijs": "vanaf € 00", "foto": "" },
     { "naam": "Bloemstuk voor de kerk", "categorie": "Bruidswerk", "omschrijving": "Bloemwerk bij het altaar, de ingang of de banken.", "prijs": "vanaf € 00", "foto": "" },
