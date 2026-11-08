@@ -1,0 +1,5 @@
+# Door het beheer op de server aangemaakt (nooit in GitHub zetten)
+beheer/config.php
+beheer/tweede-stap.php
+beheer/data/*
+!beheer/data/.htaccess

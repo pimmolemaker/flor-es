@@ -25,7 +25,7 @@
 
 <section class="section">
   <div class="container split" style="align-items:start">
-    <form id="contactform" novalidate>
+    <form id="contactform" method="post" action="contact/verstuur.php">
       <label>Waar gaat je vraag over?
         <select name="onderwerp">
           <option>Bruidswerk</option>
@@ -39,21 +39,26 @@
         </select>
       </label>
       <div class="row2">
-        <label>Naam<input type="text" name="naam" autocomplete="name"></label>
-        <label>E-mailadres<input type="email" name="email" autocomplete="email"></label>
+        <label>Naam<input type="text" name="naam" required maxlength="100" autocomplete="name"></label>
+        <label>E-mailadres<input type="email" name="email" required maxlength="150" autocomplete="email"></label>
       </div>
       <div class="row2">
         <label>Telefoon (niet verplicht)<input type="tel" name="telefoon" autocomplete="tel"></label>
         <label>Gewenste datum (niet verplicht)<input type="text" name="datum" placeholder="bijv. 14 juni"></label>
       </div>
-      <label>Je bericht<textarea name="bericht" placeholder="Vertel kort wat je in gedachten hebt, bijvoorbeeld het aantal personen of het budget."></textarea></label>
+      <label>Je bericht<textarea name="bericht" required maxlength="5000" placeholder="Vertel kort wat je in gedachten hebt, bijvoorbeeld het aantal personen of het budget."></textarea></label>
+      <div style="position:absolute;left:-9999px" aria-hidden="true"><label>Laat dit veld leeg<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <div id="vraag-blok" hidden>
+        <label><span id="vraag-tekst">Controlevraag</span><input type="text" name="antwoord" inputmode="numeric" autocomplete="off" maxlength="3"></label>
+        <input type="hidden" name="token" id="token" value="">
+      </div>
       <div><button class="btn" type="submit">Verstuur</button></div>
-      <div class="form-msg" id="formmsg">Dit is een voorbeeldversie: het formulier verstuurt nog niets.</div>
+      <div class="form-msg" id="formmsg" role="status"></div>
     </form>
     <aside class="contact-box">
       <h3>Gegevens</h3>
-      <p>Flor-Es, Esther Leefoge<br>Veenendaal e.o.</p>
-      <p>E-mail: info@flor-es.nl<br>Telefoon: 06 - 00 00 00 00</p>
+      <p>Flor-Es, Esther Leefoge<br><span data-inst="plaats">Veenendaal e.o.</span></p>
+      <p>E-mail: <span data-inst="email">info@flor-es.nl</span><br>Telefoon: <span data-inst="telefoon">06 - 00 00 00 00</span></p>
       <p>Ik ontvang je graag thuis, of kom bij je langs. Ik reageer meestal binnen twee werkdagen.</p>
     </aside>
   </div>

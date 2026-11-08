@@ -1,0 +1,5 @@
+# De beheerpagina wordt niet door zoekmachines opgenomen
+Options -Indexes
+<IfModule mod_headers.c>
+Header set X-Robots-Tag "noindex, nofollow"
+</IfModule>
