@@ -1,0 +1,86 @@
+# Beheerscherm via Pages CMS (https://app.pagescms.org): inloggen met GitHub,
+# repository "flor-es" kiezen. Wijzigingen worden als commit in deze repository
+# opgeslagen; Vercel zet de site daarna automatisch online.
+media:
+  input: img
+  output: /img
+content:
+  - name: bloemwerk
+    label: Bloemwerk (producten)
+    type: file
+    path: data/bloemwerk.json
+    format: json
+    fields:
+      - name: producten
+        label: Producten
+        type: object
+        list: true
+        fields:
+          - { name: naam, label: Naam, type: string }
+          - name: categorie
+            label: Categorie
+            type: select
+            options:
+              values: [Bruidswerk, Rouwwerk, Projecten, Boeketten op bestelling]
+          - { name: omschrijving, label: Omschrijving, type: text }
+          - { name: prijs, label: Richtprijs (bijv. "vanaf € 45"), type: string }
+          - { name: foto, label: Foto, type: image }
+  - name: workshops
+    label: Workshops (foto's, prijzen, referenties)
+    type: file
+    path: data/workshops.json
+    format: json
+    fields:
+      - name: fotos
+        label: Foto's
+        type: object
+        list: true
+        fields:
+          - { name: foto, label: Foto, type: image }
+          - { name: bijschrift, label: Bijschrift, type: string }
+      - name: prijzen
+        label: Richtprijzen
+        type: object
+        list: true
+        fields:
+          - { name: titel, label: Titel, type: string }
+          - { name: bedrag, label: Bedrag (bijv. "€ 35"), type: string }
+          - { name: per, label: Per (bijv. "per persoon, vanaf 6 deelnemers"), type: string }
+          - { name: toelichting, label: Toelichting, type: text }
+      - name: referenties
+        label: Referenties
+        type: object
+        list: true
+        fields:
+          - { name: tekst, label: Reactie, type: text }
+          - { name: naam, label: Naam en organisatie, type: string }
+  - name: groei-en-bloei
+    label: Groei en Bloei (agenda en foto's)
+    type: file
+    path: data/groei-en-bloei.json
+    format: json
+    fields:
+      - name: agenda
+        label: Agenda
+        type: object
+        list: true
+        fields:
+          - { name: dag, label: Dag (bijv. "14"), type: string }
+          - { name: maand, label: Maand (bijv. "maart"), type: string }
+          - { name: titel, label: Titel, type: string }
+          - { name: locatie, label: Locatie en tijd, type: string }
+          - { name: link, label: Link voor meer info, type: string }
+      - name: fotos
+        label: Foto's
+        type: object
+        list: true
+        fields:
+          - { name: foto, label: Foto, type: image }
+          - { name: bijschrift, label: Bijschrift, type: string }
+  - name: instellingen
+    label: Instellingen
+    type: file
+    path: data/instellingen.json
+    format: json
+    fields:
+      - { name: trouwambtenaarLive, label: "Pagina Trouwambtenaar zichtbaar op de site", type: boolean }
