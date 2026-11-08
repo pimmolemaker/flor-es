@@ -4,9 +4,9 @@
   var PAGINAS = [
     ["index.html", "Home"],
     ["over.html", "Over"],
+    ["bloemwerk.html", "Bloemwerk"],
     ["workshops.html", "Workshops"],
     ["groei-en-bloei.html", "Groei en Bloei"],
-    ["bloemwerk.html", "Bloemwerk"],
     ["trouwen-op-maat.html", "Trouwen op maat"]
   ];
   var AMBTENAAR = ["trouwambtenaar.html", "Trouwambtenaar"];
@@ -149,6 +149,33 @@
         ]));
       });
     }).catch(function () { bw.appendChild(el("p", { klasse: "container leeg", tekst: "De producten konden niet worden geladen." })); });
+  }
+
+  // ---- Bloemwerk: knop "Hoe werk ik?" toont de werkwijze uit de pagina Over ----
+  var wknop = document.getElementById("werkwijze-knop");
+  var wpaneel = document.getElementById("werkwijze-paneel");
+  if (wknop && wpaneel) {
+    var geladen = false;
+    wknop.addEventListener("click", function (e) {
+      if (!wpaneel.hidden) {
+        wpaneel.hidden = true; wknop.setAttribute("aria-expanded", "false"); wknop.textContent = "Hoe werk ik?";
+        e.preventDefault(); return;
+      }
+      if (geladen) {
+        wpaneel.hidden = false; wknop.setAttribute("aria-expanded", "true"); wknop.textContent = "Verberg werkwijze";
+        e.preventDefault(); return;
+      }
+      e.preventDefault();
+      fetch("over.html").then(function (r) { return r.text(); }).then(function (t) {
+        var bron = new DOMParser().parseFromString(t, "text/html").getElementById("werkwijze");
+        if (!bron) throw new Error("geen werkwijze");
+        var kopie = document.importNode(bron, true);
+        kopie.removeAttribute("id");
+        wpaneel.appendChild(kopie);
+        geladen = true; wpaneel.hidden = false;
+        wknop.setAttribute("aria-expanded", "true"); wknop.textContent = "Verberg werkwijze";
+      }).catch(function () { location.href = wknop.getAttribute("href"); });
+    });
   }
 
   // ---- Workshops: foto's, prijzen, referenties ----
