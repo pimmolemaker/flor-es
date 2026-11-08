@@ -3,7 +3,7 @@
 Website van bloemiste Esther Leefoge: gewone HTML, CSS en JavaScript, zonder build-stap.
 
 ## Pagina's
-`index`, `over`, `workshops`, `groei-en-bloei`, `bloemwerk`, `trouwbegeleiding`, `contact`
+`index`, `over`, `workshops`, `groei-en-bloei`, `bloemwerk`, `trouwen-op-maat`, `contact`
 en de proefpagina `trouwambtenaar` (nog niet live, zie hieronder).
 
 ## Inhoud beheren

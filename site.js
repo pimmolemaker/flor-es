@@ -7,7 +7,7 @@
     ["workshops.html", "Workshops"],
     ["groei-en-bloei.html", "Groei en Bloei"],
     ["bloemwerk.html", "Bloemwerk"],
-    ["trouwbegeleiding.html", "Trouwbegeleiding"]
+    ["trouwen-op-maat.html", "Trouwen op maat"]
   ];
   var AMBTENAAR = ["trouwambtenaar.html", "Trouwambtenaar"];
 

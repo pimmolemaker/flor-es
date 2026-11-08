@@ -219,7 +219,7 @@ textarea { min-height: 150px; resize: vertical; }
 .chip { text-decoration: none; border: 1.5px solid var(--navy); color: var(--navy); border-radius: 999px; padding: .4rem 1.2rem; font-size: .95rem; }
 .chip:hover { background: var(--navy); color: var(--white); }
 
-/* Stappen (Over, Trouwbegeleiding) */
+/* Stappen (Over, Trouwen op maat) */
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; counter-reset: stap; }
 .steps.vier { grid-template-columns: repeat(4, 1fr); }
 .step { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.8rem; counter-increment: stap; }
