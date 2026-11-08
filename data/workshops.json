@@ -1,0 +1,16 @@
+{
+  "prijzen": [
+    { "titel": "Particulier", "bedrag": "€ 00", "per": "per persoon, vanaf 6 deelnemers", "toelichting": "Inclusief bloemen, materialen en koffie of thee." },
+    { "titel": "Bedrijf", "bedrag": "€ 00", "per": "per persoon, vanaf 8 deelnemers", "toelichting": "Op locatie mogelijk, reiskosten naar afspraak." },
+    { "titel": "Instelling", "bedrag": "€ 00", "per": "per persoon, naar groepsgrootte", "toelichting": "Aangepast aan de groep en het budget." }
+  ],
+  "fotos": [
+    { "foto": "", "bijschrift": "Workshop" }, { "foto": "", "bijschrift": "Workshop" }, { "foto": "", "bijschrift": "Gemaakt werk" },
+    { "foto": "", "bijschrift": "Gemaakt werk" }, { "foto": "", "bijschrift": "Workshop" }, { "foto": "", "bijschrift": "Workshop" }
+  ],
+  "referenties": [
+    { "tekst": "Hier komt een enthousiaste reactie van een tevreden klant.", "naam": "Naam, organisatie" },
+    { "tekst": "Een tweede referentie, bijvoorbeeld van een bedrijf of instelling.", "naam": "Naam, organisatie" },
+    { "tekst": "Een derde referentie. Er kunnen er later net zoveel bij als je wilt.", "naam": "Naam, organisatie" }
+  ]
+}

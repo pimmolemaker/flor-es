@@ -5,25 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Groei en Bloei Veenendaal | Flor-Es</title>
 <meta name="description" content="Workshops via Groei en Bloei Veenendaal, met informatie, foto's en een link naar de website van Groei en Bloei.">
+<link rel="icon" href="img/logo.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="site-header">
-  <div class="container nav">
-    <a class="brand" href="index.html"><img src="img/logo.png" alt=""><span>Flor-Es</span></a>
-    <button class="menu-toggle" aria-expanded="false" aria-controls="menu">Menu</button>
-    <ul id="menu">
-      <li><a href="index.html">Home</a></li>
-      <li><a href="workshops.html">Workshops</a></li>
-      <li><a href="groei-en-bloei.html" aria-current="page">Groei en Bloei</a></li>
-      <li><a href="bloemwerk.html">Bloemwerk</a></li>
-      <li><a class="btn small" href="contact.html">Contact</a></li>
-    </ul>
-  </div>
-</header>
+<header id="site-header"></header>
 <main>
 
 <section class="page-hero">
@@ -56,57 +45,24 @@
       <span class="eyebrow">Agenda</span>
       <h2>Eerstvolgende workshops</h2>
     </div>
-    <ul class="agenda">
-      <li><div class="date"><b>00</b><span>maand</span></div><div><h3 style="margin:0">Titel van de workshop</h3><span>Locatie · aanvangstijd</span></div><a class="btn small outline" href="https://www.groei.nl" target="_blank" rel="noopener">Meer info</a></li>
-      <li><div class="date"><b>00</b><span>maand</span></div><div><h3 style="margin:0">Titel van de volgende workshop</h3><span>Locatie · aanvangstijd</span></div><a class="btn small outline" href="https://www.groei.nl" target="_blank" rel="noopener">Meer info</a></li>
-    </ul>
+    <ul class="agenda" id="gb-agenda"></ul>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
-    <div class="gallery">
-      <div class="ph ">Foto</div><div class="ph t2">Foto</div><div class="ph t3">Foto</div><div class="ph ">Foto</div>
-    </div>
+    <div class="gallery" id="gb-fotos"></div>
   </div>
 </section>
 <section class="section cta">
   <div class="container">
-    <h2>Benieuwd naar de mogelijkheden?</h2>
-    <p class="lead">Vertel wat je in gedachten hebt. Je krijgt vrijblijvend informatie of een offerte op maat.</p>
+    <h2>Vragen over de workshops?</h2>
+    <p class="lead">Neem gerust contact op.</p>
     <div class="btn-row" style="justify-content:center"><a class="btn" href="contact.html">Neem contact op</a></div>
   </div>
 </section>
 </main>
-<footer class="site-footer">
-  <div class="container">
-    <div class="foot-grid">
-      <div>
-        <h3>Flor-Es</h3>
-        <p>Bloemwerk en workshops, met aandacht gemaakt.</p>
-      </div>
-      <div>
-        <h3>Pagina's</h3>
-        <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="workshops.html">Workshops</a></li>
-          <li><a href="groei-en-bloei.html">Groei en Bloei</a></li>
-          <li><a href="bloemwerk.html">Bloemwerk</a></li>
-          <li><a href="contact.html">Contact</a></li>
-        </ul>
-      </div>
-      <div>
-        <h3>Contact</h3>
-        <ul>
-          <li>info@flor-es.nl</li>
-          <li>06 - 00 00 00 00</li>
-          <li>Veenendaal e.o.</li>
-        </ul>
-      </div>
-    </div>
-    <div class="copy">© 2026 Flor-Es · Voorbeeldversie, gegevens volgen</div>
-  </div>
-</footer>
+<footer id="site-footer"></footer>
 <script src="site.js"></script>
 </body>
 </html>

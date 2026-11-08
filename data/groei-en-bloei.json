@@ -1,0 +1,10 @@
+{
+  "agenda": [
+    { "dag": "00", "maand": "maand", "titel": "Titel van de workshop", "locatie": "Locatie · aanvangstijd", "link": "https://www.groei.nl" },
+    { "dag": "00", "maand": "maand", "titel": "Titel van de volgende workshop", "locatie": "Locatie · aanvangstijd", "link": "https://www.groei.nl" }
+  ],
+  "fotos": [
+    { "foto": "", "bijschrift": "Workshop" }, { "foto": "", "bijschrift": "Workshop" },
+    { "foto": "", "bijschrift": "Gemaakt werk" }, { "foto": "", "bijschrift": "Gemaakt werk" }
+  ]
+}
