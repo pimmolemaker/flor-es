@@ -83,11 +83,11 @@
     [inst.email || "info@flor-es.nl", inst.telefoon || "06 - 00 00 00 00", inst.plaats || "Veenendaal e.o."].forEach(function (t) { contact.appendChild(el("li", { tekst: t })); });
     voet.appendChild(el("div", { klasse: "container" }, [
       el("div", { klasse: "foot-grid" }, [
-        el("div", {}, [el("h3", { tekst: "Flor-Es" }), el("p", { tekst: "Bloemwerk, workshops en trouwen, persoonlijk en met aandacht." })]),
+        el("div", {}, [el("h3", { tekst: "Flor-Es" }), el("p", { tekst: inst.voet || "Bloemwerk, workshops en trouwen, persoonlijk en met aandacht." })]),
         el("div", {}, [el("h3", { tekst: "Pagina's" }), ul]),
         el("div", {}, [el("h3", { tekst: "Contact" }), contact])
       ]),
-      el("div", { klasse: "copy", tekst: "© 2026 Flor-Es · Voorbeeldversie, gegevens volgen" })
+      el("div", { klasse: "copy", tekst: inst.kleinedruk || "© 2026 Flor-Es" })
     ]));
   }
 
@@ -157,9 +157,10 @@
   var wpaneel = document.getElementById("werkwijze-paneel");
   if (wknop && wpaneel) {
     var geladen = false;
+    var wTekst = wknop.textContent.trim() || "Hoe werk ik?";
     wknop.addEventListener("click", function (e) {
       if (!wpaneel.hidden) {
-        wpaneel.hidden = true; wknop.setAttribute("aria-expanded", "false"); wknop.textContent = "Hoe werk ik?";
+        wpaneel.hidden = true; wknop.setAttribute("aria-expanded", "false"); wknop.textContent = wTekst;
         e.preventDefault(); return;
       }
       if (geladen) {

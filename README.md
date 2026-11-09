@@ -26,7 +26,7 @@ behalve `README.md`, `.git` en `.gitignore`.
 - De mappen `data`, `img` en `beheer/data` moeten door de website beschreven kunnen worden (standaard bij Hostnet).
 
 ## Wat zit er in
-- `*.html`, `style.css`, `site.js`: de pagina's en het ontwerp
+- `*.html`, `style.css`, `site.js`: de pagina's en het ontwerp. De teksten in de pagina's pas je aan via het beheer (Teksten); ze staan in de pagina's zelf, tussen markeringen `<!--t:...-->tekst<!--/t-->`. Het beheer bewaart eerst een reservekopie van de pagina in `beheer/data/backup`
 - `data/*.json`: de inhoud die het beheer aanpast (producten, workshopprijzen, referenties, agenda, instellingen).
   `site.js` leest dit in en toont het op de pagina's
 - `img/`: foto's (de foto's die je via het beheer uploadt komen hier)
@@ -34,9 +34,11 @@ behalve `README.md`, `.git` en `.gitignore`.
 - `contact/`: verstuurt het contactformulier, met spambeveiliging (verborgen veld, rekenvraag, wachttijd, limiet per bezoeker)
 
 ## Let op: de inhoud staat op de server, niet alleen hier
-Wat Esther via het beheer wijzigt, staat in `data/*.json` en `img/` **op Hostnet**. Als je later alle bestanden
-uit deze repository opnieuw uploadt, overschrijf je die. Download dan eerst `data/` en `img/` van Hostnet
-(of upload alleen `*.html`, `style.css`, `site.js`, `beheer/*.php` en `contact/*.php`).
+Wat Esther via het beheer wijzigt, staat in `data/*.json`, `img/` en in de teksten van de `*.html`-pagina's **op Hostnet**.
+Als je later bestanden uit deze repository opnieuw uploadt, overschrijf je die. Upload daarom alleen wat nodig is
+(`style.css`, `site.js`, `beheer/*.php`, `contact/*.php`) en nooit `data/`, `img/` of de `*.html`-pagina's,
+tenzij je eerst een kopie van de server hebt gemaakt. Moet een pagina toch aangepast worden, pas dan de tekst aan in het beheer
+of werk de pagina op de server handmatig bij.
 
 ## Pagina Trouwambtenaar
 Staat niet in het menu, is op `noindex` gezet en stuurt bezoekers door naar de homepage zolang

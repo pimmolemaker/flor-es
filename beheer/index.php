@@ -33,7 +33,7 @@ function kader($titel, $inhoud, $nav = true) {
     if (!empty($_SESSION['melding'])) { list($t, $f) = $_SESSION['melding']; unset($_SESSION['melding']); $m = '<p class="melding' . ($f ? ' fout' : '') . '" role="status">' . e($t) . '</p>'; }
     $menu = '';
     if ($nav && ingelogd()) {
-        $menu = '<nav><a href="/beheer/">Start</a><a href="/beheer/?a=lijst&l=bloemwerk">Bloemwerk</a><a href="/beheer/?a=workshops">Workshops</a><a href="/beheer/?a=groei">Groei en Bloei</a>'
+        $menu = '<nav><a href="/beheer/">Start</a><a href="/beheer/?a=lijst&l=bloemwerk">Bloemwerk</a><a href="/beheer/?a=teksten">Teksten</a><a href="/beheer/?a=workshops">Workshops</a><a href="/beheer/?a=groei">Groei en Bloei</a>'
               . '<a href="/beheer/?a=media">Foto\'s</a><a href="/beheer/?a=instellingen">Instellingen</a><a href="/" target="_blank" rel="noopener">Bekijk site ↗</a>'
               . '<form method="post" action="/beheer/?a=uitloggen">' . csrf_veld() . '<button>Uitloggen</button></form></nav>';
     }
@@ -258,11 +258,87 @@ if ($a === 'categorieen') {
 function overzicht($titel, $regels) {
     $h = '<div class="b-start">';
     foreach ($regels as $r) { $h .= '<a href="/beheer/?a=lijst&l=' . $r[0] . '"><strong>' . e($r[1]) . '</strong><span>' . $r[2] . '</span></a>'; }
-    kader($titel, $h . '</div><p class="b-hulp">De gewone teksten van de pagina\'s (bijvoorbeeld de uitleg bovenaan) staan in de pagina\'s zelf. Wil je daar iets aan veranderen? Vraag het dan aan Pim.</p>');
+    kader($titel, $h . '</div><p class="b-hulp">De gewone teksten van de pagina\'s (bijvoorbeeld de uitleg bovenaan) pas je aan bij <a href="/beheer/?a=teksten">Teksten</a>.</p>');
 }
 function aantal($b, $s) { return count(lees($b)[$s] ?? []); }
 if ($a === 'workshops') overzicht('Workshops', [['ws-fotos', 'Foto\'s', aantal('workshops', 'fotos') . ' foto\'s'], ['ws-prijzen', 'Richtprijzen', aantal('workshops', 'prijzen') . ' prijzen'], ['ws-referenties', 'Referenties', aantal('workshops', 'referenties') . ' referenties']]);
 if ($a === 'groei') overzicht('Groei en Bloei', [['gb-agenda', 'Agenda', aantal('groei-en-bloei', 'agenda') . ' workshops'], ['gb-fotos', 'Foto\'s', aantal('groei-en-bloei', 'fotos') . ' foto\'s']]);
+
+/* ---------- Teksten van de pagina's ---------- */
+// De teksten staan in de pagina's zelf, tussen markeringen <!--t:sleutel|sectie::naam|kort/lang-->tekst<!--/t-->.
+// Het beheer leest die markeringen en schrijft de tekst terug. Voor elke wijziging wordt een reservekopie van de pagina bewaard.
+const TEKSTPAGINAS = ['index' => 'Home', 'over' => 'Over', 'bloemwerk' => 'Bloemwerk', 'workshops' => 'Workshops', 'groei-en-bloei' => 'Groei en Bloei',
+    'trouwen-op-maat' => 'Trouwen op maat', 'trouwambtenaar' => 'Trouwambtenaar (proefpagina)', 'contact' => 'Contact'];
+const TEKST_PATROON = '~<!--t:([a-z0-9]+)\|([^|]*?)\|(kort|lang)-->(.*?)<!--/t-->~s';
+
+function tekst_pad($naam) { return BASIS . '/' . $naam . '.html'; }
+function html_naar_tekst($h) {
+    $h = preg_replace('~<br\s*/?>~i', "\n", $h);
+    $h = preg_replace('~<em>(.*?)</em>~s', '*$1*', $h);
+    return html_entity_decode(strip_tags($h), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+}
+function tekst_naar_html($t) {
+    $h = htmlspecialchars(trim(str_replace("\r", '', $t)), ENT_NOQUOTES, 'UTF-8');
+    $h = preg_replace('~\*([^*\n]+)\*~', '<em>$1</em>', $h);
+    return str_replace("\n", '<br>', $h);
+}
+function tekst_velden($naam) {
+    $html = (string)@file_get_contents(tekst_pad($naam));
+    $v = [];
+    if (preg_match('~<title>(.*?)</title>~s', $html, $m)) $v[] = ['_titel', 'Webpagina::Titel (tabblad van de browser en Google)', 'kort', html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')];
+    if (preg_match('~<meta name="description" content="([^"]*)">~', $html, $m)) $v[] = ['_omschrijving', 'Webpagina::Korte omschrijving voor Google', 'lang', html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')];
+    if (preg_match_all(TEKST_PATROON, $html, $ms, PREG_SET_ORDER)) foreach ($ms as $m) $v[] = [$m[1], $m[2], $m[3], html_naar_tekst($m[4])];
+    return $v;
+}
+function tekst_reservekopie($naam) {
+    if (!is_dir(DATA . '/backup')) @mkdir(DATA . '/backup', 0755, true);
+    @copy(tekst_pad($naam), DATA . "/backup/pagina-$naam-" . date('Ymd-His') . '.html');
+    $oud = glob(DATA . "/backup/pagina-$naam-*.html") ?: [];
+    sort($oud);
+    while (count($oud) > 30) { @unlink(array_shift($oud)); }
+}
+
+if ($a === 'teksten') {
+    $rijen = '';
+    foreach (TEKSTPAGINAS as $n => $titel) {
+        $rijen .= '<tr><td><strong>' . e($titel) . '</strong><br><small>' . count(tekst_velden($n)) . ' teksten</small></td><td class="b-acties"><a class="b-knop klein" href="/beheer/?a=tekst&p=' . e($n) . '">Teksten bewerken</a></td></tr>';
+    }
+    kader('Teksten van de pagina\'s', '<p>Kies een pagina om de teksten aan te passen. Wijzigingen staan meteen op de site, en van elke pagina wordt eerst een reservekopie bewaard.</p><table class="b-tabel">' . $rijen . '</table>'
+        . '<p class="b-hulp">Foto\'s, producten, prijzen, referenties en de agenda pas je aan via de andere onderdelen van het beheer. Menu en contactgegevens staan bij Instellingen.</p>');
+}
+if ($a === 'tekst') {
+    $n = $_GET['p'] ?? ''; if (!isset(TEKSTPAGINAS[$n])) ga('teksten');
+    $velden = tekst_velden($n);
+    if ($post) {
+        controleer_csrf();
+        $html = (string)file_get_contents(tekst_pad($n)); $orig = $html;
+        $html = preg_replace_callback(TEKST_PATROON, function ($m) { $k = 't_' . $m[1]; return isset($_POST[$k]) ? '<!--t:' . $m[1] . '|' . $m[2] . '|' . $m[3] . '-->' . tekst_naar_html(mb_substr((string)$_POST[$k], 0, 3000)) . '<!--/t-->' : $m[0]; }, $html);
+        if (isset($_POST['t__titel']) && trim($_POST['t__titel']) !== '') $html = preg_replace_callback('~<title>.*?</title>~s', function () { return '<title>' . htmlspecialchars(trim(mb_substr((string)$_POST['t__titel'], 0, 200)), ENT_NOQUOTES, 'UTF-8') . '</title>'; }, $html, 1);
+        if (isset($_POST['t__omschrijving'])) $html = preg_replace_callback('~(<meta name="description" content=")[^"]*(">)~', function ($m) { return $m[1] . htmlspecialchars(trim(str_replace("\n", ' ', mb_substr((string)$_POST['t__omschrijving'], 0, 300))), ENT_COMPAT, 'UTF-8') . $m[2]; }, $html, 1);
+        if ($html === $orig) { melding('Er was niets veranderd.'); ga('tekst', '&p=' . $n); }
+        if (strpos($html, '<main>') === false || strpos($html, '</main>') === false) throw new RuntimeException('De pagina zou beschadigd raken. Er is niets opgeslagen.');
+        tekst_reservekopie($n);
+        $tmp = tekst_pad($n) . '.tmp';
+        if (file_put_contents($tmp, $html, LOCK_EX) === false) throw new RuntimeException('Opslaan is mislukt. Controleer de schrijfrechten.');
+        rename($tmp, tekst_pad($n));
+        melding('Opgeslagen. De wijzigingen staan meteen op de site.'); ga('tekst', '&p=' . $n);
+    }
+    $f = '<p><a href="/beheer/?a=teksten">← Alle pagina\'s</a> · <a href="' . ($n === 'index' ? '/' : '/' . e($n) . '.html') . ($n === 'trouwambtenaar' ? '?voorbeeld=1' : '') . '" target="_blank" rel="noopener">Bekijk de pagina ↗</a></p>'
+        . '<form method="post" class="b-form" action="/beheer/?a=tekst&p=' . e($n) . '">' . csrf_veld()
+        . '<p class="b-hulp">Zet een woord tussen sterretjes, bijvoorbeeld <code>*karakter*</code>, om het schuin (en op de homepage ook gekleurd) te tonen. Een nieuwe regel blijft een nieuwe regel. Links, foto\'s en de volgorde van de teksten staan vast.</p>';
+    $vorige = null;
+    foreach ($velden as $v) {
+        list($k, $label, $soort, $tekst) = $v;
+        $delen = explode('::', $label, 2); $sectie = $delen[0]; $naam = $delen[1] ?? $delen[0];
+        if ($sectie !== $vorige) { if ($vorige !== null) $f .= '</fieldset>'; $f .= '<fieldset><legend>' . e($sectie) . '</legend>'; $vorige = $sectie; }
+        $f .= '<label>' . e($naam) . ($soort === 'lang'
+            ? '<textarea name="t_' . e($k) . '" rows="' . max(3, min(9, (int)ceil(mb_strlen($tekst) / 70) + 1)) . '">' . e($tekst) . '</textarea>'
+            : '<input name="t_' . e($k) . '" value="' . e($tekst) . '">') . '</label>';
+    }
+    if ($vorige !== null) $f .= '</fieldset>';
+    $f .= '<p><button class="b-knop">Opslaan</button> <a href="/beheer/?a=teksten">Annuleren</a></p></form>';
+    kader('Teksten: ' . TEKSTPAGINAS[$n], $f);
+}
 
 /* ---------- Foto's ---------- */
 if ($a === 'media') {
@@ -307,12 +383,14 @@ if ($a === 'instellingen') {
         bewaar_prive('site', array_merge($prive, ['ontvanger' => $ontv, 'afzender' => $afz]));
         $open['trouwambtenaarLive'] = !empty($_POST['live']);
         $open['email'] = p('email'); $open['telefoon'] = p('telefoon'); $open['plaats'] = p('plaats');
+        $open['voet'] = p('voet'); $open['kleinedruk'] = p('kleinedruk');
         bewaar('instellingen', $open);
         melding('Instellingen opgeslagen.'); ga('instellingen');
     }
     $f = function ($n, $l, $v, $t = 'text') { return '<label>' . $l . '<input type="' . $t . '" name="' . $n . '" value="' . e($v) . '"></label>'; };
     kader('Instellingen', '<form method="post" class="b-form" action="/beheer/?a=instellingen">' . csrf_veld()
         . '<fieldset><legend>Contactgegevens op de site</legend>' . $f('email', 'E-mailadres', $open['email'] ?? '', 'email') . $f('telefoon', 'Telefoonnummer', $open['telefoon'] ?? '') . $f('plaats', 'Plaats of regio', $open['plaats'] ?? '') . '</fieldset>'
+        . '<fieldset><legend>Onderaan elke pagina</legend>' . $f('voet', 'Korte tekst onder de naam Flor-Es', $open['voet'] ?? '') . $f('kleinedruk', 'Kleine regel helemaal onderaan (leeg = © 2026 Flor-Es)', $open['kleinedruk'] ?? '') . '</fieldset>'
         . '<fieldset><legend>Contactformulier</legend>' . $f('ontvanger', 'Berichten uit het contactformulier komen binnen op dit e-mailadres', $prive['ontvanger'] ?? '', 'email')
         . $f('afzender', 'Afzenderadres (een adres van je eigen domein, anders komt de mail vaak in de spam)', $prive['afzender'] ?? '', 'email') . '</fieldset>'
         . '<fieldset><legend>Pagina Trouwambtenaar</legend><label class="b-aan"><input type="checkbox" name="live" value="1"' . (!empty($open['trouwambtenaarLive']) ? ' checked' : '') . '> Pagina Trouwambtenaar zichtbaar op de site en in het menu</label>'
@@ -335,6 +413,7 @@ $mailwaarschuwing = (lees_prive('site')['ontvanger'] ?? '') === '' ? '<p class="
 kader('Welkom', $mailwaarschuwing . '<div class="b-start">'
     . '<a href="/beheer/?a=item&l=bloemwerk&i=nieuw"><strong>Nieuw product</strong><span>Bijvoorbeeld een corsage of bloemstuk</span></a>'
     . '<a href="/beheer/?a=lijst&l=bloemwerk"><strong>Bloemwerk</strong><span>' . aantal('bloemwerk', 'producten') . ' producten</span></a>'
+    . '<a href="/beheer/?a=teksten"><strong>Teksten</strong><span>De teksten op alle pagina\'s</span></a>'
     . '<a href="/beheer/?a=workshops"><strong>Workshops</strong><span>Foto\'s, prijzen, referenties</span></a>'
     . '<a href="/beheer/?a=groei"><strong>Groei en Bloei</strong><span>Agenda en foto\'s</span></a>'
     . '<a href="/beheer/?a=media"><strong>Foto\'s</strong><span>Uploaden en opruimen</span></a>'
