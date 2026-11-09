@@ -25,7 +25,8 @@
     return /^(https?:\/\/|mailto:|tel:|\/|[\w-]+\.html)/i.test(url || "") ? url : "#";
   }
   function laad(bestand) {
-    return fetch(bestand).then(function (r) {
+    // "no-cache": de browser vraagt steeds of het bestand veranderd is, zodat wijzigingen uit het beheer meteen zichtbaar zijn
+    return fetch(bestand, { cache: "no-cache" }).then(function (r) {
       if (!r.ok) throw new Error(bestand);
       return r.json();
     });
