@@ -235,22 +235,41 @@ if ($a === 'item') {
 
 /* ---------- Categorieën van het bloemwerk ---------- */
 if ($a === 'categorieen') {
-    $data = lees('bloemwerk'); $cats = $data['categorieen'] ?? [];
+    $data = lees('bloemwerk'); $cats = $data['categorieen'] ?? []; $prods = $data['producten'] ?? [];
+    $aantal_in = function ($naam) use ($prods) { return count(array_filter($prods, function ($x) use ($naam) { return ($x['categorie'] ?? '') === $naam; })); };
     if ($post) {
         controleer_csrf();
-        foreach ($cats as $k => $c) $cats[$k]['intro'] = p('intro_' . $k);
-        if (p('nieuw_naam') !== '') {
-            foreach ($cats as $c) if (mb_strtolower($c['naam']) === mb_strtolower(p('nieuw_naam'))) { melding('Deze categorie bestaat al.', true); ga('categorieen'); }
-            $cats[] = ['naam' => p('nieuw_naam'), 'intro' => p('nieuw_intro')];
+        $nieuwe = []; $hernoem = []; $namen = [];
+        foreach ($cats as $k => $c) {
+            if (!empty($_POST['weg_' . $k])) {
+                if ($aantal_in($c['naam']) > 0) { melding('De categorie ' . $c['naam'] . ' heeft nog producten en kan niet worden verwijderd. Verplaats of verwijder die eerst.', true); ga('categorieen'); }
+                continue;
+            }
+            $naam = p('naam_' . $k) !== '' ? p('naam_' . $k) : $c['naam'];
+            if ($naam !== $c['naam']) $hernoem[$c['naam']] = $naam;
+            $nieuwe[] = ['naam' => $naam, 'intro' => p('intro_' . $k)];
         }
-        $data['categorieen'] = $cats; bewaar('bloemwerk', $data);
-        melding('Opgeslagen.'); ga('categorieen');
+        if (p('nieuw_naam') !== '') $nieuwe[] = ['naam' => p('nieuw_naam'), 'intro' => p('nieuw_intro')];
+        foreach ($nieuwe as $c) {
+            $l = mb_strtolower($c['naam']);
+            if (isset($namen[$l])) { melding('Twee categorieën hebben dezelfde naam: ' . $c['naam'] . '.', true); ga('categorieen'); }
+            $namen[$l] = true;
+        }
+        foreach ($prods as $i => $pr) if (isset($hernoem[$pr['categorie'] ?? ''])) $prods[$i]['categorie'] = $hernoem[$pr['categorie']];
+        $data['categorieen'] = $nieuwe; $data['producten'] = $prods; bewaar('bloemwerk', $data);
+        melding('Opgeslagen. De wijzigingen staan meteen op de site.'); ga('categorieen');
     }
     $f = '<form method="post" class="b-form" action="/beheer/?a=categorieen">' . csrf_veld();
-    foreach ($cats as $k => $c) $f .= '<label>' . e($c['naam']) . ': inleidende tekst op de pagina<textarea name="intro_' . $k . '" rows="3">' . e($c['intro'] ?? '') . '</textarea></label>';
+    foreach ($cats as $k => $c) {
+        $n = $aantal_in($c['naam']);
+        $f .= '<fieldset><legend>' . e($c['naam']) . '</legend><label>Naam van de categorie<input name="naam_' . $k . '" value="' . e($c['naam']) . '"></label>'
+            . '<label>Inleidende tekst op de pagina Bloemwerk<textarea name="intro_' . $k . '" rows="3">' . e($c['intro'] ?? '') . '</textarea></label>'
+            . ($n === 0 ? '<label class="b-aan"><input type="checkbox" name="weg_' . $k . '" value="1"> Deze categorie verwijderen (er staan geen producten in)</label>' : '<p class="b-hulp">' . $n . ' product' . ($n === 1 ? '' : 'en') . ' in deze categorie.</p>')
+            . '</fieldset>';
+    }
     $f .= '<fieldset><legend>Nieuwe categorie toevoegen</legend><label>Naam<input name="nieuw_naam"></label><label>Inleidende tekst<textarea name="nieuw_intro" rows="3"></textarea></label></fieldset>'
         . '<p><button class="b-knop">Opslaan</button> <a href="/beheer/?a=lijst&l=bloemwerk">Terug naar de producten</a></p>'
-        . '<p class="b-hulp">Een categorie hernoemen of weghalen kan niet vanaf hier, omdat producten eraan hangen. Vraag dat desnoods aan Pim.</p></form>';
+        . '<p class="b-hulp">Hernoem je een categorie, dan gaan de producten erin vanzelf mee.</p></form>';
     kader('Categorieën bloemwerk', $f);
 }
 
@@ -326,6 +345,11 @@ if ($a === 'tekst') {
     $f = '<p><a href="/beheer/?a=teksten">← Alle pagina\'s</a> · <a href="' . ($n === 'index' ? '/' : '/' . e($n) . '.html') . ($n === 'trouwambtenaar' ? '?voorbeeld=1' : '') . '" target="_blank" rel="noopener">Bekijk de pagina ↗</a></p>'
         . '<form method="post" class="b-form" action="/beheer/?a=tekst&p=' . e($n) . '">' . csrf_veld()
         . '<p class="b-hulp">Zet een woord tussen sterretjes, bijvoorbeeld <code>*karakter*</code>, om het schuin (en op de homepage ook gekleurd) te tonen. Een nieuwe regel blijft een nieuwe regel. Links, foto\'s en de volgorde van de teksten staan vast.</p>';
+    $wijzer = ['bloemwerk' => 'De categorieën (zoals Bruidswerk en Rouwwerk) met hun inleidende tekst, en alle producten met omschrijving en prijs, pas je aan bij <a href="/beheer/?a=lijst&l=bloemwerk">Bloemwerk</a> en <a href="/beheer/?a=categorieen">Categorieën en inleidende teksten</a>.',
+        'workshops' => 'De foto\'s, richtprijzen en referenties pas je aan bij <a href="/beheer/?a=workshops">Workshops</a>.',
+        'groei-en-bloei' => 'De agenda en de foto\'s pas je aan bij <a href="/beheer/?a=groei">Groei en Bloei</a>.',
+        'contact' => 'Het e-mailadres, telefoonnummer en de plaats pas je aan bij <a href="/beheer/?a=instellingen">Instellingen</a>.'];
+    if (isset($wijzer[$n])) $f .= '<p class="melding">' . $wijzer[$n] . '</p>';
     $vorige = null;
     foreach ($velden as $v) {
         list($k, $label, $soort, $tekst) = $v;
