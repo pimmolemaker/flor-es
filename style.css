@@ -257,3 +257,25 @@ body[data-niet-live]:not(.toon) main { visibility: hidden; }
 .cat-tekst p:last-child { margin: 0; }
 .cat-kop { font-size: clamp(1.4rem, 2.2vw, 1.7rem); color: var(--navy); margin: 0 0 .5rem; }
 .cat-tekst .btn-row { margin-top: 1.3rem; font-size: 1rem; }
+
+/* Foto vergroten */
+img.vergroot { cursor: zoom-in; }
+img.vergroot:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+.lightbox { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background: rgba(20, 30, 48, .93); padding: 3.5rem 4rem; }
+.lightbox[hidden] { display: none; }
+.lightbox figure { margin: 0; max-width: 100%; max-height: 100%; display: flex; flex-direction: column; align-items: center; gap: .8rem; }
+.lightbox img { max-width: 100%; max-height: calc(100vh - 11rem); object-fit: contain; border-radius: 6px; background: #fff; }
+.lb-tekst { margin: 0; color: #fff; font-family: var(--serif); font-size: 1.3rem; text-align: center; }
+.lb-knop { position: absolute; width: 3rem; height: 3rem; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .16); color: #fff; font-size: 2rem; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+.lb-knop:hover, .lb-knop:focus-visible { background: rgba(255, 255, 255, .32); outline: 2px solid #fff; }
+.lb-sluit { top: 1rem; right: 1rem; }
+.lb-vorige { left: 1rem; top: 50%; transform: translateY(-50%); }
+.lb-volgende { right: 1rem; top: 50%; transform: translateY(-50%); }
+.lightbox.enkel .lb-vorige, .lightbox.enkel .lb-volgende { display: none; }
+body.lb-open { overflow: hidden; }
+@media (max-width: 700px) {
+  .lightbox { padding: 3.5rem .6rem 1.5rem; }
+  .lb-vorige, .lb-volgende { top: auto; bottom: 1rem; transform: none; }
+  .lb-vorige { left: 1rem; } .lb-volgende { right: 1rem; }
+  .lightbox img { max-height: calc(100vh - 12rem); }
+}

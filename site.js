@@ -33,7 +33,8 @@
   }
   function foto(f, extra) {
     if (f && f.foto) {
-      return el("img", { src: f.foto, alt: f.bijschrift || f.naam || "", loading: "lazy", klasse: "foto " + (extra || "") });
+      var tekst = f.bijschrift || f.naam || "";
+      return el("img", { src: f.foto, alt: tekst, loading: "lazy", klasse: "foto vergroot " + (extra || ""), tabindex: "0", role: "button", "aria-label": "Vergroot foto" + (tekst ? ": " + tekst : "") });
     }
     return el("div", { klasse: "ph " + (extra || ""), tekst: "Foto" });
   }
@@ -279,4 +280,68 @@
       }
     });
   }
+
+  // ---- Foto's vergroten: klik op een foto om hem groot te bekijken ----
+  (function () {
+    var overlay = null, groot, onderschrift, groep = [], nu = 0, terugnaar = null, startX = null;
+
+    function bouw() {
+      groot = el("img", { alt: "" });
+      onderschrift = el("p", { klasse: "lb-tekst" });
+      var sluit = el("button", { type: "button", klasse: "lb-knop lb-sluit", "aria-label": "Sluiten", tekst: "\u00d7" });
+      var vorige = el("button", { type: "button", klasse: "lb-knop lb-vorige", "aria-label": "Vorige foto", tekst: "\u2039" });
+      var volgende = el("button", { type: "button", klasse: "lb-knop lb-volgende", "aria-label": "Volgende foto", tekst: "\u203a" });
+      overlay = el("div", { klasse: "lightbox", role: "dialog", "aria-modal": "true", "aria-label": "Foto vergroot", hidden: "" }, [sluit, vorige, el("figure", {}, [groot, onderschrift]), volgende]);
+      overlay.addEventListener("click", function (e) { if (e.target === overlay || e.target.tagName === "FIGURE") sluiten(); });
+      sluit.addEventListener("click", sluiten);
+      vorige.addEventListener("click", function () { ga(-1); });
+      volgende.addEventListener("click", function () { ga(1); });
+      overlay.addEventListener("touchstart", function (e) { startX = e.changedTouches[0].clientX; }, { passive: true });
+      overlay.addEventListener("touchend", function (e) {
+        if (startX === null) return;
+        var d = e.changedTouches[0].clientX - startX; startX = null;
+        if (Math.abs(d) > 50) ga(d < 0 ? 1 : -1);
+      }, { passive: true });
+      document.body.appendChild(overlay);
+    }
+    function toon() {
+      var f = groep[nu];
+      groot.src = f.currentSrc || f.src;
+      groot.alt = f.alt || "";
+      onderschrift.textContent = f.alt || "";
+      onderschrift.style.display = f.alt ? "" : "none";
+      overlay.classList.toggle("enkel", groep.length < 2);
+    }
+    function ga(stap) { nu = (nu + stap + groep.length) % groep.length; toon(); }
+    function open(img) {
+      if (!overlay) bouw();
+      var bron = img.closest(".gallery") || document.getElementById("bloemwerk-lijst") || document.body;
+      groep = [].slice.call(bron.querySelectorAll("img.vergroot"));
+      nu = Math.max(0, groep.indexOf(img));
+      terugnaar = img;
+      toon();
+      overlay.hidden = false;
+      document.body.classList.add("lb-open");
+      overlay.querySelector(".lb-sluit").focus();
+    }
+    function sluiten() {
+      if (!overlay || overlay.hidden) return;
+      overlay.hidden = true;
+      document.body.classList.remove("lb-open");
+      if (terugnaar) terugnaar.focus();
+    }
+    document.addEventListener("click", function (e) {
+      var img = e.target.closest && e.target.closest("img.vergroot");
+      if (img) open(img);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (overlay && !overlay.hidden) {
+        if (e.key === "Escape") sluiten();
+        else if (e.key === "ArrowLeft") ga(-1);
+        else if (e.key === "ArrowRight") ga(1);
+        return;
+      }
+      if ((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("vergroot")) { e.preventDefault(); open(e.target); }
+    });
+  })();
 })();
