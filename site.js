@@ -196,7 +196,7 @@
   if (ws) {
     laad("data/workshops.json").then(function (d) {
       var g = document.getElementById("ws-fotos");
-      (d.fotos || []).forEach(function (f, i) { g.appendChild(foto(f, i % 5 === 0 ? "wide" : "")); });
+      (d.fotos || []).forEach(function (f) { g.appendChild(foto(f)); });
       var p = document.getElementById("ws-prijzen");
       (d.prijzen || []).forEach(function (x) {
         p.appendChild(el("div", { klasse: "price" }, [

@@ -129,9 +129,10 @@ p { margin: 0 0 1.1em; }
 .ph.tall { aspect-ratio: 3 / 4; }
 .ph.round { border-radius: var(--radius); }
 
-.gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-.gallery .ph, .gallery img { border-radius: 14px; width: 100%; }
-.gallery .wide { grid-column: span 2; }
+/* Fotogalerij: alle foto's even groot, drie naast elkaar; een onvolledige laatste rij staat in het midden */
+.gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; }
+.gallery > * { flex: 0 0 calc((100% - 2rem) / 3); min-width: 0; }
+.gallery .ph, .gallery img { border-radius: 14px; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
 
 /* Twee kolommen */
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
@@ -195,7 +196,7 @@ textarea { min-height: 150px; resize: vertical; }
   .hero-grid, .split, .cards, .prices, .quotes, .foot-grid, .row2 { grid-template-columns: 1fr; }
   .split.reverse > :first-child { order: 0; }
   .hero-art { max-width: 420px; margin-inline: auto; }
-  .gallery { grid-template-columns: repeat(2, 1fr); }
+  .gallery > * { flex-basis: calc((100% - 1rem) / 2); }
   .agenda li { grid-template-columns: 70px 1fr; }
   .agenda li .btn { grid-column: 1 / -1; justify-self: start; }
 }
