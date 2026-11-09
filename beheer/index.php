@@ -234,6 +234,12 @@ if ($a === 'item') {
 }
 
 /* ---------- Categorieën van het bloemwerk ---------- */
+function knop_opties($gekozen) {
+    $o = '<option value="">Geen extra knop</option>';
+    foreach (KNOPPAGINAS as $f => $naam) $o .= '<option value="' . e($f) . '"' . ($f === $gekozen ? ' selected' : '') . '>' . e($naam) . '</option>';
+    return $o;
+}
+const KNOPPAGINAS = ['trouwen-op-maat.html' => 'Trouwen op maat', 'over.html' => 'Over', 'workshops.html' => 'Workshops', 'groei-en-bloei.html' => 'Groei en Bloei', 'contact.html' => 'Contact'];
 if ($a === 'categorieen') {
     $data = lees('bloemwerk'); $cats = $data['categorieen'] ?? []; $prods = $data['producten'] ?? [];
     $aantal_in = function ($naam) use ($prods) { return count(array_filter($prods, function ($x) use ($naam) { return ($x['categorie'] ?? '') === $naam; })); };
@@ -247,9 +253,9 @@ if ($a === 'categorieen') {
             }
             $naam = p('naam_' . $k) !== '' ? p('naam_' . $k) : $c['naam'];
             if ($naam !== $c['naam']) $hernoem[$c['naam']] = $naam;
-            $nieuwe[] = ['naam' => $naam, 'intro' => p('intro_' . $k), 'tekstkop' => mb_substr(p('tekstkop_' . $k), 0, 150), 'werkwijze' => mb_substr(trim(str_replace("\r", '', (string)($_POST['werkwijze_' . $k] ?? ''))), 0, 3000), 'knop' => mb_substr(p('knop_' . $k), 0, 120)];
+            $nieuwe[] = ['naam' => $naam, 'intro' => p('intro_' . $k), 'tekstkop' => mb_substr(p('tekstkop_' . $k), 0, 150), 'werkwijze' => mb_substr(trim(str_replace("\r", '', (string)($_POST['werkwijze_' . $k] ?? ''))), 0, 3000), 'knop' => mb_substr(p('knop_' . $k), 0, 120), 'knop2' => mb_substr(p('knop2_' . $k), 0, 60), 'knop2pagina' => isset(KNOPPAGINAS[p('knop2pagina_' . $k)]) ? p('knop2pagina_' . $k) : ''];
         }
-        if (p('nieuw_naam') !== '') $nieuwe[] = ['naam' => p('nieuw_naam'), 'intro' => p('nieuw_intro'), 'tekstkop' => mb_substr(p('nieuw_tekstkop'), 0, 150), 'werkwijze' => mb_substr(trim(str_replace("\r", '', (string)($_POST['nieuw_werkwijze'] ?? ''))), 0, 3000), 'knop' => mb_substr(p('nieuw_knop'), 0, 120)];
+        if (p('nieuw_naam') !== '') $nieuwe[] = ['naam' => p('nieuw_naam'), 'intro' => p('nieuw_intro'), 'tekstkop' => mb_substr(p('nieuw_tekstkop'), 0, 150), 'werkwijze' => mb_substr(trim(str_replace("\r", '', (string)($_POST['nieuw_werkwijze'] ?? ''))), 0, 3000), 'knop' => mb_substr(p('nieuw_knop'), 0, 120), 'knop2' => mb_substr(p('nieuw_knop2'), 0, 60), 'knop2pagina' => isset(KNOPPAGINAS[p('nieuw_knop2pagina')]) ? p('nieuw_knop2pagina') : ''];
         foreach ($nieuwe as $c) {
             $l = mb_strtolower($c['naam']);
             if (isset($namen[$l])) { melding('Twee categorieën hebben dezelfde naam: ' . $c['naam'] . '.', true); ga('categorieen'); }
@@ -266,11 +272,13 @@ if ($a === 'categorieen') {
             . '<label>Inleidende tekst op de pagina Bloemwerk<textarea name="intro_' . $k . '" rows="3">' . e($c['intro'] ?? '') . '</textarea></label>'
             . '<label>Kopje boven de tekst onder de producten (niet verplicht)<input name="tekstkop_' . $k . '" value="' . e($c['tekstkop'] ?? '') . '"></label>'
             . '<label>Korte tekst onder de producten (niet verplicht; een nieuwe regel is een nieuwe alinea)<textarea name="werkwijze_' . $k . '" rows="6">' . e($c['werkwijze'] ?? '') . '</textarea></label>'
+            . '<label>Extra knop onder de tekst: deze pagina openen (niet verplicht)<select name="knop2pagina_' . $k . '">' . knop_opties($c['knop2pagina'] ?? '') . '</select></label>'
+            . '<label>Tekst op die extra knop (leeg = de naam van de pagina)<input name="knop2_' . $k . '" value="' . e($c['knop2'] ?? '') . '"></label>'
             . '<label>Tekst op de knop onder deze categorie (leeg = Wil je weten wat er mogelijk is? Neem contact op.)<input name="knop_' . $k . '" value="' . e($c['knop'] ?? '') . '"></label>'
             . ($n === 0 ? '<label class="b-aan"><input type="checkbox" name="weg_' . $k . '" value="1"> Deze categorie verwijderen (er staan geen producten in)</label>' : '<p class="b-hulp">' . $n . ' product' . ($n === 1 ? '' : 'en') . ' in deze categorie.</p>')
             . '</fieldset>';
     }
-    $f .= '<fieldset><legend>Nieuwe categorie toevoegen</legend><label>Naam<input name="nieuw_naam"></label><label>Inleidende tekst<textarea name="nieuw_intro" rows="3"></textarea></label><label>Kopje boven de tekst onder de producten (niet verplicht)<input name="nieuw_tekstkop"></label><label>Korte tekst onder de producten (niet verplicht)<textarea name="nieuw_werkwijze" rows="4"></textarea></label><label>Tekst op de knop (leeg = standaard)<input name="nieuw_knop"></label></fieldset>'
+    $f .= '<fieldset><legend>Nieuwe categorie toevoegen</legend><label>Naam<input name="nieuw_naam"></label><label>Inleidende tekst<textarea name="nieuw_intro" rows="3"></textarea></label><label>Kopje boven de tekst onder de producten (niet verplicht)<input name="nieuw_tekstkop"></label><label>Korte tekst onder de producten (niet verplicht)<textarea name="nieuw_werkwijze" rows="4"></textarea></label><label>Extra knop onder de tekst: deze pagina openen (niet verplicht)<select name="nieuw_knop2pagina">' . knop_opties('') . '</select></label><label>Tekst op die extra knop (leeg = de naam van de pagina)<input name="nieuw_knop2"></label><label>Tekst op de knop (leeg = standaard)<input name="nieuw_knop"></label></fieldset>'
         . '<p><button class="b-knop">Opslaan</button> <a href="/beheer/?a=lijst&l=bloemwerk">Terug naar de producten</a></p>'
         . '<p class="b-hulp">Hernoem je een categorie, dan gaan de producten erin vanzelf mee.</p></form>';
     kader('Categorieën bloemwerk', $f);

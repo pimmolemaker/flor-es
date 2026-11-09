@@ -142,9 +142,14 @@
         });
         if (!items.length) grid.appendChild(el("p", { klasse: "leeg", tekst: "Hier komen binnenkort producten." }));
         var tekstblok = null;
-        if (c.werkwijze || c.tekstkop) {
+        if (c.werkwijze || c.tekstkop || c.knop2pagina) {
           var alineas = String(c.werkwijze || "").split(/\n+/).filter(Boolean).map(function (t) { return el("p", { tekst: t }); });
-          tekstblok = el("div", { klasse: "cat-tekst" }, [c.tekstkop ? el("h3", { klasse: "cat-kop", tekst: c.tekstkop }) : null].concat(alineas));
+          var extraknop = null;
+          if (c.knop2pagina && /^[\w-]+\.html$/.test(c.knop2pagina)) {
+            var paginanaam = (PAGINAS.concat([["contact.html", "Contact"]]).filter(function (x) { return x[0] === c.knop2pagina; })[0] || [0, "Meer informatie"])[1];
+            extraknop = el("p", { klasse: "btn-row" }, [el("a", { klasse: "btn small", href: c.knop2pagina, tekst: c.knop2 || paginanaam })]);
+          }
+          tekstblok = el("div", { klasse: "cat-tekst" }, [c.tekstkop ? el("h3", { klasse: "cat-kop", tekst: c.tekstkop }) : null].concat(alineas).concat([extraknop]));
         }
         bw.appendChild(el("section", { klasse: "section" + (i % 2 ? " tint" : ""), id: id }, [
           el("div", { klasse: "container" }, [

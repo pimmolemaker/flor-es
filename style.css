@@ -255,3 +255,4 @@ body[data-niet-live]:not(.toon) main { visibility: hidden; }
 .cat-tekst p { margin: 0 0 1em; }
 .cat-tekst p:last-child { margin: 0; }
 .cat-kop { font-size: clamp(1.4rem, 2.2vw, 1.7rem); color: var(--navy); margin: 0 0 .5rem; }
+.cat-tekst .btn-row { margin-top: 1.3rem; font-size: 1rem; }
