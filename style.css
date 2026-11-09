@@ -249,3 +249,9 @@ body[data-niet-live]:not(.toon) main { visibility: hidden; }
   .hero-art.klein { max-width: 170px; order: -1; }
 }
 .note:empty { display: none; }
+
+/* Korte tekst onder de producten van een categorie */
+.cat-tekst { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.6rem 1.8rem; margin-top: 2rem; max-width: 46rem; }
+.section:not(.tint) .cat-tekst { background: var(--pink-soft); border-color: transparent; }
+.cat-tekst p { margin: 0 0 .9em; color: var(--navy-soft); }
+.cat-tekst p:last-child { margin: 0; }

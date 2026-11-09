@@ -247,9 +247,9 @@ if ($a === 'categorieen') {
             }
             $naam = p('naam_' . $k) !== '' ? p('naam_' . $k) : $c['naam'];
             if ($naam !== $c['naam']) $hernoem[$c['naam']] = $naam;
-            $nieuwe[] = ['naam' => $naam, 'intro' => p('intro_' . $k)];
+            $nieuwe[] = ['naam' => $naam, 'intro' => p('intro_' . $k), 'werkwijze' => mb_substr(trim(str_replace("\r", '', (string)($_POST['werkwijze_' . $k] ?? ''))), 0, 3000)];
         }
-        if (p('nieuw_naam') !== '') $nieuwe[] = ['naam' => p('nieuw_naam'), 'intro' => p('nieuw_intro')];
+        if (p('nieuw_naam') !== '') $nieuwe[] = ['naam' => p('nieuw_naam'), 'intro' => p('nieuw_intro'), 'werkwijze' => mb_substr(trim(str_replace("\r", '', (string)($_POST['nieuw_werkwijze'] ?? ''))), 0, 3000)];
         foreach ($nieuwe as $c) {
             $l = mb_strtolower($c['naam']);
             if (isset($namen[$l])) { melding('Twee categorieën hebben dezelfde naam: ' . $c['naam'] . '.', true); ga('categorieen'); }
@@ -264,10 +264,11 @@ if ($a === 'categorieen') {
         $n = $aantal_in($c['naam']);
         $f .= '<fieldset><legend>' . e($c['naam']) . '</legend><label>Naam van de categorie<input name="naam_' . $k . '" value="' . e($c['naam']) . '"></label>'
             . '<label>Inleidende tekst op de pagina Bloemwerk<textarea name="intro_' . $k . '" rows="3">' . e($c['intro'] ?? '') . '</textarea></label>'
+            . '<label>Korte tekst onder de producten (niet verplicht; een nieuwe regel is een nieuwe alinea)<textarea name="werkwijze_' . $k . '" rows="6">' . e($c['werkwijze'] ?? '') . '</textarea></label>'
             . ($n === 0 ? '<label class="b-aan"><input type="checkbox" name="weg_' . $k . '" value="1"> Deze categorie verwijderen (er staan geen producten in)</label>' : '<p class="b-hulp">' . $n . ' product' . ($n === 1 ? '' : 'en') . ' in deze categorie.</p>')
             . '</fieldset>';
     }
-    $f .= '<fieldset><legend>Nieuwe categorie toevoegen</legend><label>Naam<input name="nieuw_naam"></label><label>Inleidende tekst<textarea name="nieuw_intro" rows="3"></textarea></label></fieldset>'
+    $f .= '<fieldset><legend>Nieuwe categorie toevoegen</legend><label>Naam<input name="nieuw_naam"></label><label>Inleidende tekst<textarea name="nieuw_intro" rows="3"></textarea></label><label>Korte tekst onder de producten (niet verplicht)<textarea name="nieuw_werkwijze" rows="4"></textarea></label></fieldset>'
         . '<p><button class="b-knop">Opslaan</button> <a href="/beheer/?a=lijst&l=bloemwerk">Terug naar de producten</a></p>'
         . '<p class="b-hulp">Hernoem je een categorie, dan gaan de producten erin vanzelf mee.</p></form>';
     kader('Categorieën bloemwerk', $f);

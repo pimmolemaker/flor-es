@@ -1,21 +1,103 @@
 {
   "categorieen": [
-    { "naam": "Bruidswerk", "intro": "Van bruidsboeket tot bloemen voor de kerk of het gemeentehuis. Samen kijken we wat past bij jullie dag, de locatie en de kleuren." },
-    { "naam": "Rouwwerk", "intro": "Een troostrijk, persoonlijk afscheid in bloemen." },
-    { "naam": "Projecten", "intro": "Bloemen voor bedrijven, horeca en evenementen." },
-    { "naam": "Boeketten op bestelling", "intro": "Een boeket voor een verjaardag, een bedankje of zomaar. Laat weten wat je wilt geven." }
+    {
+      "naam": "Bruidswerk",
+      "intro": "Van bruidsboeket tot bloemen voor de kerk of het gemeentehuis. Samen kijken we wat past bij jullie dag, de locatie en de kleuren.",
+      "werkwijze": ""
+    },
+    {
+      "naam": "Rouwwerk",
+      "intro": "Een troostrijk, persoonlijk afscheid in bloemen.",
+      "werkwijze": "Soms wil je zelf heel bewust betrokken zijn bij het kiezen van de bloemen voor een afscheid. Voor een dierbare, of misschien wel voor jezelf.\nIk neem graag de tijd om samen de mogelijkheden te bespreken. Als je dat prettig vindt, kunnen we ook samen naar de bloemengroothandel om bloemen en kleuren uit te zoeken.\nZo ontstaat bloemwerk dat echt aansluit bij jouw wensen."
+    },
+    {
+      "naam": "Projecten",
+      "intro": "Bloemen voor bedrijven, horeca en evenementen.",
+      "werkwijze": ""
+    },
+    {
+      "naam": "Boeketten op bestelling",
+      "intro": "Een boeket voor een verjaardag, een bedankje of zomaar. Laat weten wat je wilt geven.",
+      "werkwijze": ""
+    }
   ],
   "producten": [
-    { "naam": "Bruidsboeket", "categorie": "Bruidswerk", "omschrijving": "Een boeket op maat, in de kleuren en bloemen die jullie mooi vinden.", "prijs": "vanaf € 00", "foto": "" },
-    { "naam": "Corsages en knoopsgatbloemen", "categorie": "Bruidswerk", "omschrijving": "Voor bruidegom, ouders en getuigen.", "prijs": "vanaf € 00", "foto": "" },
-    { "naam": "Autobloemstuk", "categorie": "Bruidswerk", "omschrijving": "Een bloemstuk voor op de trouwauto.", "prijs": "vanaf € 00", "foto": "" },
-    { "naam": "Bloemstuk voor de kerk", "categorie": "Bruidswerk", "omschrijving": "Bloemwerk bij het altaar, de ingang of de banken.", "prijs": "vanaf € 00", "foto": "" },
-    { "naam": "Bloemstuk voor het gemeentehuis", "categorie": "Bruidswerk", "omschrijving": "Een bloemstuk voor de trouwzaal.", "prijs": "vanaf € 00", "foto": "" },
-    { "naam": "Rouwboeket", "categorie": "Rouwwerk", "omschrijving": "Een persoonlijk boeket, in de kleuren die bij het afscheid passen.", "prijs": "vanaf € 00", "foto": "" },
-    { "naam": "Rouwkrans", "categorie": "Rouwwerk", "omschrijving": "Een krans in de maat en stijl die je wilt.", "prijs": "vanaf € 00", "foto": "" },
-    { "naam": "Kistbedekking", "categorie": "Rouwwerk", "omschrijving": "Bloemen op de kist, naar wens en seizoen.", "prijs": "vanaf € 00", "foto": "" },
-    { "naam": "Vaste bloemendecoratie", "categorie": "Projecten", "omschrijving": "Wekelijks of maandelijks verse bloemen voor je bedrijf of zaak.", "prijs": "op aanvraag", "foto": "" },
-    { "naam": "Evenementen en openingen", "categorie": "Projecten", "omschrijving": "Bloemwerk voor een bijzondere gelegenheid.", "prijs": "op aanvraag", "foto": "" },
-    { "naam": "Boeket naar keuze", "categorie": "Boeketten op bestelling", "omschrijving": "Jij kiest de kleuren en het budget, ik maak het boeket.", "prijs": "vanaf € 00", "foto": "" }
+    {
+      "naam": "Bruidsboeket",
+      "categorie": "Bruidswerk",
+      "omschrijving": "Een boeket op maat, in de kleuren en bloemen die jullie mooi vinden.",
+      "prijs": "vanaf € 00",
+      "foto": ""
+    },
+    {
+      "naam": "Corsages en knoopsgatbloemen",
+      "categorie": "Bruidswerk",
+      "omschrijving": "Voor bruidegom, ouders en getuigen.",
+      "prijs": "vanaf € 00",
+      "foto": ""
+    },
+    {
+      "naam": "Autobloemstuk",
+      "categorie": "Bruidswerk",
+      "omschrijving": "Een bloemstuk voor op de trouwauto.",
+      "prijs": "vanaf € 00",
+      "foto": ""
+    },
+    {
+      "naam": "Bloemstuk voor de kerk",
+      "categorie": "Bruidswerk",
+      "omschrijving": "Bloemwerk bij het altaar, de ingang of de banken.",
+      "prijs": "vanaf € 00",
+      "foto": ""
+    },
+    {
+      "naam": "Bloemstuk voor het gemeentehuis",
+      "categorie": "Bruidswerk",
+      "omschrijving": "Een bloemstuk voor de trouwzaal.",
+      "prijs": "vanaf € 00",
+      "foto": ""
+    },
+    {
+      "naam": "Rouwboeket",
+      "categorie": "Rouwwerk",
+      "omschrijving": "Een persoonlijk boeket, in de kleuren die bij het afscheid passen.",
+      "prijs": "vanaf € 00",
+      "foto": ""
+    },
+    {
+      "naam": "Rouwkrans",
+      "categorie": "Rouwwerk",
+      "omschrijving": "Een krans in de maat en stijl die je wilt.",
+      "prijs": "vanaf € 00",
+      "foto": ""
+    },
+    {
+      "naam": "Kistbedekking",
+      "categorie": "Rouwwerk",
+      "omschrijving": "Bloemen op de kist, naar wens en seizoen.",
+      "prijs": "vanaf € 00",
+      "foto": ""
+    },
+    {
+      "naam": "Vaste bloemendecoratie",
+      "categorie": "Projecten",
+      "omschrijving": "Wekelijks of maandelijks verse bloemen voor je bedrijf of zaak.",
+      "prijs": "op aanvraag",
+      "foto": ""
+    },
+    {
+      "naam": "Evenementen en openingen",
+      "categorie": "Projecten",
+      "omschrijving": "Bloemwerk voor een bijzondere gelegenheid.",
+      "prijs": "op aanvraag",
+      "foto": ""
+    },
+    {
+      "naam": "Boeket naar keuze",
+      "categorie": "Boeketten op bestelling",
+      "omschrijving": "Jij kiest de kleuren en het budget, ik maak het boeket.",
+      "prijs": "vanaf € 00",
+      "foto": ""
+    }
   ]
 }

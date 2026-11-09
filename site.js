@@ -141,10 +141,15 @@
           ]));
         });
         if (!items.length) grid.appendChild(el("p", { klasse: "leeg", tekst: "Hier komen binnenkort producten." }));
+        var tekstblok = null;
+        if (c.werkwijze) {
+          tekstblok = el("div", { klasse: "cat-tekst" }, String(c.werkwijze).split(/\n+/).filter(Boolean).map(function (t) { return el("p", { tekst: t }); }));
+        }
         bw.appendChild(el("section", { klasse: "section" + (i % 2 ? " tint" : ""), id: id }, [
           el("div", { klasse: "container" }, [
             el("div", { klasse: "kop-blok" }, [el("h2", { tekst: c.naam }), c.intro ? el("p", { klasse: "lead", tekst: c.intro }) : null]),
             grid,
+            tekstblok,
             el("p", { klasse: "btn-row" }, [el("a", { klasse: "btn outline small", href: "contact.html", tekst: "Vraag een offerte aan" })])
           ])
         ]));
