@@ -40,7 +40,7 @@ function kader($titel, $inhoud, $nav = true) {
     }
     echo '<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">'
        . '<title>' . e($titel) . ' – Beheer Flor-Es</title><link rel="stylesheet" href="/beheer/beheer.css"></head><body>'
-       . '<header class="b-kop"><strong>Beheer Flor-Es</strong>' . $menu . '</header><main class="b-inhoud">' . $m . '<h1>' . e($titel) . '</h1>' . $inhoud . '</main></body></html>';
+       . '<header class="b-kop"><strong>Beheer Flor-Es</strong>' . $menu . '</header><main class="b-inhoud">' . $m . '<h1>' . e($titel) . '</h1>' . $inhoud . '</main><script src="/beheer/beheer.js?v=1" defer></script></body></html>';
     exit;
 }
 

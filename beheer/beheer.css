@@ -48,3 +48,7 @@ fieldset{border:1px solid var(--l);border-radius:.4rem;padding:.8rem 1rem;displa
 .b-kies span{display:block;padding:.3rem .4rem}
 .b-live{background:var(--v);border-radius:.4rem;padding:.8rem 1rem}
 .b-form label.b-kies-rij{display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:.5rem;align-items:center;font-weight:400}
+.b-niet{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;gap:1rem;align-items:center;justify-content:center;flex-wrap:wrap;padding:.8rem 1rem;background:#fff4e5;border-top:3px solid var(--g);box-shadow:0 -4px 14px rgba(0,0,0,.12);font-weight:600}
+.b-niet[hidden]{display:none}
+body{padding-bottom:0}
+.b-inhoud{padding-bottom:7rem}
