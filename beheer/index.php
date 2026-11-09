@@ -5,6 +5,7 @@ require __DIR__ . '/lib.php';
 require __DIR__ . '/tweestap.php';
 
 $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+ini_set('session.use_strict_mode', '1');
 session_name('beheer_flores');
 session_set_cookie_params(['lifetime' => 0, 'path' => '/beheer/', 'secure' => $https, 'httponly' => true, 'samesite' => 'Strict']);
 session_start();
