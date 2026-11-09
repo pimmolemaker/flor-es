@@ -89,7 +89,7 @@ p { margin: 0 0 1.1em; }
 .btn-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.6rem; }
 
 /* Hero (tweedeling) */
-.hero { padding: clamp(2.5rem, 6vw, 5rem) 0; background: linear-gradient(180deg, var(--cream), var(--white)); }
+.hero { overflow: hidden; padding: clamp(2.5rem, 6vw, 5rem) 0; background: linear-gradient(180deg, var(--cream), var(--white)); }
 .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(2rem, 6vw, 5rem); align-items: center; }
 .hero h1 em { font-style: italic; color: var(--coral); }
 .hero-art { position: relative; }
