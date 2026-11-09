@@ -4,9 +4,9 @@
   var PAGINAS = [
     ["index.html", "Home"],
     ["over.html", "Over"],
+    ["bloemwerk.html", "Bloemwerk"],
     ["workshops.html", "Workshops"],
     ["groei-en-bloei.html", "Groei en Bloei"],
-    ["bloemwerk.html", "Bloemwerk"],
     ["trouwen-op-maat.html", "Trouwen op maat"]
   ];
   var AMBTENAAR = ["trouwambtenaar.html", "Trouwambtenaar"];
@@ -69,6 +69,7 @@
     kop.appendChild(el("div", { klasse: "container nav" }, [merk, knop, ul]));
   }
 
+  var inst = {};
   function bouwVoet(metAmbtenaar) {
     var voet = document.getElementById("site-footer");
     if (!voet) return;
@@ -78,7 +79,7 @@
     var ul = el("ul", {});
     lijst.forEach(function (p) { ul.appendChild(el("li", {}, [el("a", { href: p[0], tekst: p[1] })])); });
     var contact = el("ul", {});
-    ["info@flor-es.nl", "06 - 00 00 00 00", "Veenendaal e.o."].forEach(function (t) { contact.appendChild(el("li", { tekst: t })); });
+    [inst.email || "info@flor-es.nl", inst.telefoon || "06 - 00 00 00 00", inst.plaats || "Veenendaal e.o."].forEach(function (t) { contact.appendChild(el("li", { tekst: t })); });
     voet.appendChild(el("div", { klasse: "container" }, [
       el("div", { klasse: "foot-grid" }, [
         el("div", {}, [el("h3", { tekst: "Flor-Es" }), el("p", { tekst: "Bloemwerk, workshops en trouwen, persoonlijk en met aandacht." })]),
@@ -94,7 +95,12 @@
 
   // ---- Instellingen: is de trouwambtenaar-pagina live? ----
   var gate = document.body.hasAttribute("data-niet-live");
-  laad("data/instellingen.json").catch(function () { return {}; }).then(function (inst) {
+  laad("data/instellingen.json").catch(function () { return {}; }).then(function (gegevens) {
+    inst = gegevens;
+    [].forEach.call(document.querySelectorAll("[data-inst]"), function (n) {
+      var w = inst[n.getAttribute("data-inst")];
+      if (w) n.textContent = w;
+    });
     var live = inst.trouwambtenaarLive === true;
     bouwKop(live || (gate && voorbeeld));
     bouwVoet(live || (gate && voorbeeld));
@@ -145,6 +151,33 @@
     }).catch(function () { bw.appendChild(el("p", { klasse: "container leeg", tekst: "De producten konden niet worden geladen." })); });
   }
 
+  // ---- Bloemwerk: knop "Hoe werk ik?" toont de werkwijze uit de pagina Over ----
+  var wknop = document.getElementById("werkwijze-knop");
+  var wpaneel = document.getElementById("werkwijze-paneel");
+  if (wknop && wpaneel) {
+    var geladen = false;
+    wknop.addEventListener("click", function (e) {
+      if (!wpaneel.hidden) {
+        wpaneel.hidden = true; wknop.setAttribute("aria-expanded", "false"); wknop.textContent = "Hoe werk ik?";
+        e.preventDefault(); return;
+      }
+      if (geladen) {
+        wpaneel.hidden = false; wknop.setAttribute("aria-expanded", "true"); wknop.textContent = "Verberg werkwijze";
+        e.preventDefault(); return;
+      }
+      e.preventDefault();
+      fetch("over.html").then(function (r) { return r.text(); }).then(function (t) {
+        var bron = new DOMParser().parseFromString(t, "text/html").getElementById("werkwijze");
+        if (!bron) throw new Error("geen werkwijze");
+        var kopie = document.importNode(bron, true);
+        kopie.removeAttribute("id");
+        wpaneel.appendChild(kopie);
+        geladen = true; wpaneel.hidden = false;
+        wknop.setAttribute("aria-expanded", "true"); wknop.textContent = "Verberg werkwijze";
+      }).catch(function () { location.href = wknop.getAttribute("href"); });
+    });
+  }
+
   // ---- Workshops: foto's, prijzen, referenties ----
   var ws = document.getElementById("ws-data");
   if (ws) {
@@ -183,12 +216,27 @@
     });
   }
 
-  // ---- Contactformulier: nog niet werkend ----
+  // ---- Contactformulier: verstuurt via contact/verstuur.php (alleen op de echte server met PHP) ----
   var form = document.getElementById("contactform");
   if (form) {
+    var melding = document.getElementById("formmsg");
+    var klaar = false;
+    fetch("contact/vraag.php", { cache: "no-store" }).then(function (r) {
+      if (!r.ok) throw new Error("geen php");
+      return r.json();
+    }).then(function (v) {
+      if (!v.vraag) throw new Error("geen vraag");
+      document.getElementById("vraag-tekst").textContent = v.vraag;
+      document.getElementById("token").value = v.token;
+      document.getElementById("vraag-blok").hidden = false;
+      klaar = true;
+    }).catch(function () { /* bijvoorbeeld op een voorbeeldadres zonder PHP */ });
     form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      document.getElementById("formmsg").style.display = "block";
+      if (!klaar) {
+        e.preventDefault();
+        melding.textContent = "Dit is een voorbeeldversie: het formulier werkt alleen op de echte website.";
+        melding.style.display = "block";
+      }
     });
   }
 })();
