@@ -3,22 +3,30 @@
     {
       "naam": "Bruidswerk",
       "intro": "Van bruidsboeket tot bloemen voor de kerk of het gemeentehuis. Samen kijken we wat past bij jullie dag, de locatie en de kleuren.",
-      "werkwijze": ""
+      "werkwijze": "",
+      "tekstkop": "",
+      "knop": ""
     },
     {
       "naam": "Rouwwerk",
       "intro": "Een troostrijk, persoonlijk afscheid in bloemen.",
-      "werkwijze": "Soms wil je zelf heel bewust betrokken zijn bij het kiezen van de bloemen voor een afscheid. Voor een dierbare, of misschien wel voor jezelf.\nIk neem graag de tijd om samen de mogelijkheden te bespreken. Als je dat prettig vindt, kunnen we ook samen naar de bloemengroothandel om bloemen en kleuren uit te zoeken.\nZo ontstaat bloemwerk dat echt aansluit bij jouw wensen."
+      "werkwijze": "Soms wil je zelf heel bewust betrokken zijn bij het kiezen van de bloemen voor een afscheid. Voor een dierbare, of misschien wel voor jezelf.\nIk neem graag de tijd om samen de mogelijkheden te bespreken. Als je dat prettig vindt, kunnen we ook samen naar de bloemengroothandel om bloemen en kleuren uit te zoeken.\nZo ontstaat bloemwerk dat echt aansluit bij jouw wensen.",
+      "tekstkop": "",
+      "knop": ""
     },
     {
       "naam": "Projecten",
       "intro": "Bloemen voor bedrijven, horeca en evenementen.",
-      "werkwijze": ""
+      "werkwijze": "",
+      "tekstkop": "",
+      "knop": ""
     },
     {
       "naam": "Boeketten op bestelling",
       "intro": "Een boeket voor een verjaardag, een bedankje of zomaar. Laat weten wat je wilt geven.",
-      "werkwijze": ""
+      "werkwijze": "",
+      "tekstkop": "",
+      "knop": ""
     }
   ],
   "producten": [

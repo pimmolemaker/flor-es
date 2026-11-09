@@ -142,15 +142,16 @@
         });
         if (!items.length) grid.appendChild(el("p", { klasse: "leeg", tekst: "Hier komen binnenkort producten." }));
         var tekstblok = null;
-        if (c.werkwijze) {
-          tekstblok = el("div", { klasse: "cat-tekst" }, String(c.werkwijze).split(/\n+/).filter(Boolean).map(function (t) { return el("p", { tekst: t }); }));
+        if (c.werkwijze || c.tekstkop) {
+          var alineas = String(c.werkwijze || "").split(/\n+/).filter(Boolean).map(function (t) { return el("p", { tekst: t }); });
+          tekstblok = el("div", { klasse: "cat-tekst" }, [c.tekstkop ? el("h3", { klasse: "cat-kop", tekst: c.tekstkop }) : null].concat(alineas));
         }
         bw.appendChild(el("section", { klasse: "section" + (i % 2 ? " tint" : ""), id: id }, [
           el("div", { klasse: "container" }, [
             el("div", { klasse: "kop-blok" }, [el("h2", { tekst: c.naam }), c.intro ? el("p", { klasse: "lead", tekst: c.intro }) : null]),
             grid,
             tekstblok,
-            el("p", { klasse: "btn-row" }, [el("a", { klasse: "btn outline small", href: "contact.html", tekst: "Vraag een offerte aan" })])
+            el("p", { klasse: "btn-row" }, [el("a", { klasse: "btn outline small", href: "contact.html?onderwerp=" + encodeURIComponent(c.naam), tekst: c.knop || "Wil je weten wat er mogelijk is? Neem contact op." })])
           ])
         ]));
       });
@@ -223,9 +224,36 @@
     });
   }
 
+  // ---- Knop "Neem contact op" onderaan sommige pagina's kiest het bijbehorende onderwerp ----
+  var ONDERWERP_PER_PAGINA = {
+    "workshops.html": "Workshop voor bedrijf, instelling of particulieren",
+    "groei-en-bloei.html": "Workshop via Groei en Bloei",
+    "trouwen-op-maat.html": "Trouwen op maat"
+  };
+  if (ONDERWERP_PER_PAGINA[huidig]) {
+    [].forEach.call(document.querySelectorAll(".cta a.btn"), function (a) {
+      if (a.getAttribute("href") === "contact.html") a.setAttribute("href", "contact.html?onderwerp=" + encodeURIComponent(ONDERWERP_PER_PAGINA[huidig]));
+    });
+  }
+
   // ---- Contactformulier: verstuurt via contact/verstuur.php (alleen op de echte server met PHP) ----
   var form = document.getElementById("contactform");
   if (form) {
+    // Onderwerp: voorgevuld met de categorie waarvandaan je kwam (?onderwerp=...), anders moet je zelf kiezen
+    var kies = form.querySelector("select[name=onderwerp]");
+    if (kies) {
+      var uitleg = el("option", { value: "", tekst: "Kies een onderwerp…" });
+      uitleg.disabled = true;
+      kies.insertBefore(uitleg, kies.firstChild);
+      kies.required = true;
+      var gewenst = (params.get("onderwerp") || "").trim();
+      var alias = { "projecten": "Bloemwerk voor een project", "boeketten op bestelling": "Boeket op bestelling" };
+      var doel = alias[gewenst.toLowerCase()] || gewenst;
+      var gevonden = null;
+      [].forEach.call(kies.options, function (o) { if (doel && o.value && o.text.toLowerCase() === doel.toLowerCase()) gevonden = o; });
+      if (!gevonden && doel) { gevonden = el("option", { tekst: gewenst }); kies.insertBefore(gevonden, kies.lastChild); }
+      if (gevonden) gevonden.selected = true; else uitleg.selected = true;
+    }
     var melding = document.getElementById("formmsg");
     var klaar = false;
     fetch("contact/vraag.php", { cache: "no-store" }).then(function (r) {

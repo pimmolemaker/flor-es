@@ -254,3 +254,4 @@ body[data-niet-live]:not(.toon) main { visibility: hidden; }
 .cat-tekst { margin-top: 2rem; max-width: 40em; font-size: 1.2rem; color: var(--navy-soft); }
 .cat-tekst p { margin: 0 0 1em; }
 .cat-tekst p:last-child { margin: 0; }
+.cat-kop { font-size: clamp(1.4rem, 2.2vw, 1.7rem); color: var(--navy); margin: 0 0 .5rem; }
