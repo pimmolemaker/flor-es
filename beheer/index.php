@@ -29,13 +29,47 @@ function ga($a = '', $extra = '') { header('Location: /beheer/' . ($a ? '?a=' . 
 function vraag_inlog() { if (!ingelogd()) ga('inloggen'); }
 function p($k, $d = '') { return trim((string)($_POST[$k] ?? $d)); }
 
+/* ---------- Website tijdelijk offline ---------- */
+const OFFLINE_STANDAARD = 'Onze website is tijdelijk niet beschikbaar. Binnenkort zijn we weer online.';
+function offline_flag() { return DATA . '/offline.flag'; }
+function is_offline() { return is_file(offline_flag()); }
+function offline_html($tekst, $open) {
+    $mail = trim((string)($open['email'] ?? '')); $tel = trim((string)($open['telefoon'] ?? ''));
+    $contact = ($mail !== '' || $tel !== '') ? '<p class="c">Dringende vraag? ' . ($mail !== '' ? '<a href="mailto:' . e($mail) . '">' . e($mail) . '</a>' : '') . ($mail !== '' && $tel !== '' ? ' of bel ' : '') . ($tel !== '' ? e($tel) : '') . '</p>' : '';
+    return '<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Flor-Es | Tijdelijk offline</title>
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#fdf3f1;color:#1e3150;font:18px/1.7 "Helvetica Neue",Arial,sans-serif;text-align:center;padding:2rem}
+main{max-width:34rem}
+img{width:150px;height:150px;border-radius:50%;object-fit:cover;box-shadow:0 20px 40px -20px rgba(30,49,80,.45)}
+h1{font:500 2.8rem/1.1 Georgia,"Times New Roman",serif;margin:1.2rem 0 .6rem}
+p{margin:0 0 1rem}.c{font-size:.95rem;color:#5b6a80}a{color:#c9473a}
+</style>
+</head>
+<body>
+<main>
+<img src="/img/logo.jpg" alt="">
+<h1>Flor-Es</h1>
+<p>' . nl2br(e($tekst)) . '</p>
+' . $contact . '
+</main>
+</body>
+</html>
+';
+}
+
 function kader($titel, $inhoud, $nav = true) {
     $m = '';
     if (!empty($_SESSION['melding'])) { list($t, $f) = $_SESSION['melding']; unset($_SESSION['melding']); $m = '<p class="melding' . ($f ? ' fout' : '') . '" role="status">' . e($t) . '</p>'; }
     $menu = '';
     if ($nav && ingelogd()) {
         $menu = '<nav><a href="/beheer/">Start</a><a href="/beheer/?a=lijst&l=bloemwerk">Bloemwerk</a><a href="/beheer/?a=teksten">Teksten</a><a href="/beheer/?a=workshops">Workshops</a><a href="/beheer/?a=groei">Groei en Bloei</a>'
-              . '<a href="/beheer/?a=media">Foto\'s</a><a href="/beheer/?a=instellingen">Instellingen</a><a href="/" target="_blank" rel="noopener">Bekijk site ↗</a>'
+              . '<a href="/beheer/?a=media">Foto\'s</a><a href="/beheer/?a=instellingen">Instellingen</a><a href="' . (is_offline() ? '/beheer/?a=voorbeeld' : '/') . '" target="_blank" rel="noopener">Bekijk site ↗</a>'
               . '<form method="post" action="/beheer/?a=uitloggen">' . csrf_veld() . '<button>Uitloggen</button></form></nav>';
     }
     echo '<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">'
@@ -111,6 +145,16 @@ if ($a === 'uitloggen' && $post) { controleer_csrf(); $_SESSION = []; session_de
 tweestap_login_route($a, $post);
 vraag_inlog();
 tweestap_ingelogd_route($a, $post);
+
+/* ---------- Voorbeeld: de site bekijken terwijl hij offline staat ---------- */
+if ($a === 'voorbeeld') {
+    setcookie('flores_voorbeeld', '1', ['expires' => 0, 'path' => '/', 'secure' => $https, 'httponly' => true, 'samesite' => 'Lax']);
+    header('Location: /'); exit;
+}
+if ($a === 'voorbeeld-uit') {
+    setcookie('flores_voorbeeld', '', ['expires' => time() - 3600, 'path' => '/', 'secure' => $https, 'httponly' => true, 'samesite' => 'Lax']);
+    melding('Je ziet de site nu weer zoals bezoekers hem zien.'); ga('instellingen');
+}
 
 /* ---------- Lijsten: producten, foto's, prijzen, referenties, agenda ---------- */
 
@@ -416,15 +460,22 @@ if ($a === 'instellingen') {
         controleer_csrf();
         $ontv = p('ontvanger'); $afz = p('afzender');
         foreach ([$ontv, $afz, p('email')] as $m) if ($m !== '' && !filter_var($m, FILTER_VALIDATE_EMAIL)) { melding('Een e-mailadres klopt niet.', true); ga('instellingen'); }
-        bewaar_prive('site', array_merge($prive, ['ontvanger' => $ontv, 'afzender' => $afz]));
+        $offlineTekst = mb_substr(p('offline_tekst'), 0, 600) !== '' ? mb_substr(p('offline_tekst'), 0, 600) : OFFLINE_STANDAARD;
+        bewaar_prive('site', array_merge($prive, ['ontvanger' => $ontv, 'afzender' => $afz, 'offlineTekst' => $offlineTekst]));
         $open['trouwambtenaarLive'] = !empty($_POST['live']);
         $open['email'] = p('email'); $open['telefoon'] = p('telefoon'); $open['plaats'] = p('plaats');
         $open['voet'] = p('voet'); $open['kleinedruk'] = p('kleinedruk');
         bewaar('instellingen', $open);
-        melding('Instellingen opgeslagen.'); ga('instellingen');
+        if (file_put_contents(BASIS . '/offline.html', offline_html($offlineTekst, $open), LOCK_EX) === false) throw new RuntimeException('De pagina offline.html kon niet worden opgeslagen. Controleer de schrijfrechten.');
+        if (!empty($_POST['offline'])) { if (file_put_contents(offline_flag(), date('c'), LOCK_EX) === false) throw new RuntimeException('De website kon niet offline worden gezet. Controleer de schrijfrechten van beheer/data.'); }
+        else @unlink(offline_flag());
+        melding(!empty($_POST['offline']) ? 'Instellingen opgeslagen. De website staat nu OFFLINE: bezoekers zien alleen een melding.' : 'Instellingen opgeslagen.'); ga('instellingen');
     }
     $f = function ($n, $l, $v, $t = 'text') { return '<label>' . $l . '<input type="' . $t . '" name="' . $n . '" value="' . e($v) . '"></label>'; };
-    kader('Instellingen', '<form method="post" class="b-form" action="/beheer/?a=instellingen">' . csrf_veld()
+    $offlineBlok = '<fieldset><legend>Website online of offline</legend><label class="b-aan"><input type="checkbox" name="offline" value="1"' . (is_offline() ? ' checked' : '') . '> Zet de hele website tijdelijk offline</label>'
+        . '<label>Tekst voor bezoekers<textarea name="offline_tekst" rows="3">' . e($prive['offlineTekst'] ?? OFFLINE_STANDAARD) . '</textarea></label>'
+        . '<p class="b-hulp">Staat dit aan, dan zien bezoekers alleen een pagina met deze tekst (en je e-mailadres en telefoonnummer, als je die hebt ingevuld). Het beheer blijft gewoon werken. Via <strong>Bekijk site</strong> bovenin zie je zelf nog wel de hele site. ' . (is_offline() ? '<a href="/beheer/?a=voorbeeld-uit">Zie de site zoals bezoekers hem zien</a>.' : '') . '</p></fieldset>';
+    kader('Instellingen', (is_offline() ? '<p class="melding fout">De website staat nu <strong>offline</strong>. Bezoekers zien alleen een melding.</p>' : '') . '<form method="post" class="b-form" action="/beheer/?a=instellingen">' . csrf_veld() . $offlineBlok
         . '<fieldset><legend>Contactgegevens op de site</legend>' . $f('email', 'E-mailadres', $open['email'] ?? '', 'email') . $f('telefoon', 'Telefoonnummer', $open['telefoon'] ?? '') . $f('plaats', 'Plaats of regio', $open['plaats'] ?? '') . '</fieldset>'
         . '<fieldset><legend>Onderaan elke pagina</legend>' . $f('voet', 'Korte tekst onder de naam Flor-Es', $open['voet'] ?? '') . $f('kleinedruk', 'Kleine regel helemaal onderaan (leeg = © 2026 Flor-Es)', $open['kleinedruk'] ?? '') . '</fieldset>'
         . '<fieldset><legend>Contactformulier</legend>' . $f('ontvanger', 'Berichten uit het contactformulier komen binnen op dit e-mailadres', $prive['ontvanger'] ?? '', 'email')
@@ -446,7 +497,7 @@ if ($a === 'wachtwoord' && $post) {
 
 /* ---------- Startpagina ---------- */
 $mailwaarschuwing = (lees_prive('site')['ontvanger'] ?? '') === '' ? '<p class="melding fout">Let op: er is nog geen e-mailadres ingesteld voor het contactformulier. <a href="/beheer/?a=instellingen">Doe dat nu</a>, anders komen berichten niet aan.</p>' : '';
-kader('Welkom', $mailwaarschuwing . '<div class="b-start">'
+kader('Welkom', (is_offline() ? '<p class="melding fout">De website staat nu <strong>offline</strong>. Bezoekers zien alleen een melding. <a href="/beheer/?a=instellingen">Zet hem weer online bij Instellingen</a>.</p>' : '') . $mailwaarschuwing . '<div class="b-start">'
     . '<a href="/beheer/?a=item&l=bloemwerk&i=nieuw"><strong>Nieuw product</strong><span>Bijvoorbeeld een corsage of bloemstuk</span></a>'
     . '<a href="/beheer/?a=lijst&l=bloemwerk"><strong>Bloemwerk</strong><span>' . aantal('bloemwerk', 'producten') . ' producten</span></a>'
     . '<a href="/beheer/?a=teksten"><strong>Teksten</strong><span>De teksten op alle pagina\'s</span></a>'

@@ -3,6 +3,15 @@ RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# Website tijdelijk offline: aan en uit te zetten in het beheer (Instellingen).
+# Staat het bestand beheer/data/offline.flag er, dan krijgen bezoekers de pagina offline.html (status 503).
+# Het beheer, het beeldmerk en beheerders met de voorbeeld-cookie (knop "Bekijk site" in het beheer) zien de site gewoon.
+RewriteCond %{DOCUMENT_ROOT}/beheer/data/offline.flag -f
+RewriteCond %{HTTP_COOKIE} !flores_voorbeeld=1
+RewriteCond %{REQUEST_URI} !^/(beheer/|offline\.html$|img/logo\.jpg$)
+RewriteRule ^ - [R=503,L]
+ErrorDocument 503 /offline.html
+
 DirectoryIndex index.html index.php
 
 # Snellere pagina's door caching van afbeeldingen, css en js
