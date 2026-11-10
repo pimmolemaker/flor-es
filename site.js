@@ -33,7 +33,8 @@
   }
   function foto(f, extra) {
     if (f && f.foto) {
-      return el("img", { src: f.foto, alt: f.bijschrift || f.naam || "", loading: "lazy", klasse: "foto " + (extra || "") });
+      var tekst = f.bijschrift || f.naam || "";
+      return el("img", { src: f.foto, alt: tekst, loading: "lazy", klasse: "foto vergroot " + (extra || ""), tabindex: "0", role: "button", "aria-label": "Vergroot foto" + (tekst ? ": " + tekst : "") });
     }
     return el("div", { klasse: "ph " + (extra || ""), tekst: "Foto" });
   }
@@ -141,11 +142,22 @@
           ]));
         });
         if (!items.length) grid.appendChild(el("p", { klasse: "leeg", tekst: "Hier komen binnenkort producten." }));
+        var tekstblok = null;
+        if (c.werkwijze || c.tekstkop || c.knop2pagina) {
+          var alineas = String(c.werkwijze || "").split(/\n+/).filter(Boolean).map(function (t) { return el("p", { tekst: t }); });
+          var extraknop = null;
+          if (c.knop2pagina && /^[\w-]+\.html$/.test(c.knop2pagina)) {
+            var paginanaam = (PAGINAS.concat([["contact.html", "Contact"]]).filter(function (x) { return x[0] === c.knop2pagina; })[0] || [0, "Meer informatie"])[1];
+            extraknop = el("p", { klasse: "btn-row" }, [el("a", { klasse: "btn small", href: c.knop2pagina, tekst: c.knop2 || paginanaam })]);
+          }
+          tekstblok = el("div", { klasse: "cat-tekst" }, [c.tekstkop ? el("h3", { klasse: "cat-kop", tekst: c.tekstkop }) : null].concat(alineas).concat([extraknop]));
+        }
         bw.appendChild(el("section", { klasse: "section" + (i % 2 ? " tint" : ""), id: id }, [
           el("div", { klasse: "container" }, [
             el("div", { klasse: "kop-blok" }, [el("h2", { tekst: c.naam }), c.intro ? el("p", { klasse: "lead", tekst: c.intro }) : null]),
             grid,
-            el("p", { klasse: "btn-row" }, [el("a", { klasse: "btn outline small", href: "contact.html", tekst: "Vraag een offerte aan" })])
+            tekstblok,
+            el("p", { klasse: "btn-row" }, [el("a", { klasse: "btn outline small", href: "contact.html?onderwerp=" + encodeURIComponent(c.naam), tekst: c.knop || "Wil je weten wat er mogelijk is? Neem contact op." })])
           ])
         ]));
       });
@@ -185,7 +197,7 @@
   if (ws) {
     laad("data/workshops.json").then(function (d) {
       var g = document.getElementById("ws-fotos");
-      (d.fotos || []).forEach(function (f, i) { g.appendChild(foto(f, i % 5 === 0 ? "wide" : "")); });
+      (d.fotos || []).forEach(function (f) { g.appendChild(foto(f)); });
       var p = document.getElementById("ws-prijzen");
       (d.prijzen || []).forEach(function (x) {
         p.appendChild(el("div", { klasse: "price" }, [
@@ -218,9 +230,36 @@
     });
   }
 
+  // ---- Knop "Neem contact op" onderaan sommige pagina's kiest het bijbehorende onderwerp ----
+  var ONDERWERP_PER_PAGINA = {
+    "workshops.html": "Workshop voor bedrijf, instelling of particulieren",
+    "groei-en-bloei.html": "Workshop via Groei en Bloei",
+    "trouwen-op-maat.html": "Trouwen op maat"
+  };
+  if (ONDERWERP_PER_PAGINA[huidig]) {
+    [].forEach.call(document.querySelectorAll(".cta a.btn"), function (a) {
+      if (a.getAttribute("href") === "contact.html") a.setAttribute("href", "contact.html?onderwerp=" + encodeURIComponent(ONDERWERP_PER_PAGINA[huidig]));
+    });
+  }
+
   // ---- Contactformulier: verstuurt via contact/verstuur.php (alleen op de echte server met PHP) ----
   var form = document.getElementById("contactform");
   if (form) {
+    // Onderwerp: voorgevuld met de categorie waarvandaan je kwam (?onderwerp=...), anders moet je zelf kiezen
+    var kies = form.querySelector("select[name=onderwerp]");
+    if (kies) {
+      var uitleg = el("option", { value: "", tekst: "Kies een onderwerp…" });
+      uitleg.disabled = true;
+      kies.insertBefore(uitleg, kies.firstChild);
+      kies.required = true;
+      var gewenst = (params.get("onderwerp") || "").trim();
+      var alias = { "projecten": "Bloemwerk voor een project", "boeketten op bestelling": "Boeket op bestelling" };
+      var doel = alias[gewenst.toLowerCase()] || gewenst;
+      var gevonden = null;
+      [].forEach.call(kies.options, function (o) { if (doel && o.value && o.text.toLowerCase() === doel.toLowerCase()) gevonden = o; });
+      if (!gevonden && doel) { gevonden = el("option", { tekst: gewenst }); kies.insertBefore(gevonden, kies.lastChild); }
+      if (gevonden) gevonden.selected = true; else uitleg.selected = true;
+    }
     var melding = document.getElementById("formmsg");
     var klaar = false;
     fetch("contact/vraag.php", { cache: "no-store" }).then(function (r) {
@@ -241,4 +280,68 @@
       }
     });
   }
+
+  // ---- Foto's vergroten: klik op een foto om hem groot te bekijken ----
+  (function () {
+    var overlay = null, groot, onderschrift, groep = [], nu = 0, terugnaar = null, startX = null;
+
+    function bouw() {
+      groot = el("img", { alt: "" });
+      onderschrift = el("p", { klasse: "lb-tekst" });
+      var sluit = el("button", { type: "button", klasse: "lb-knop lb-sluit", "aria-label": "Sluiten", tekst: "\u00d7" });
+      var vorige = el("button", { type: "button", klasse: "lb-knop lb-vorige", "aria-label": "Vorige foto", tekst: "\u2039" });
+      var volgende = el("button", { type: "button", klasse: "lb-knop lb-volgende", "aria-label": "Volgende foto", tekst: "\u203a" });
+      overlay = el("div", { klasse: "lightbox", role: "dialog", "aria-modal": "true", "aria-label": "Foto vergroot", hidden: "" }, [sluit, vorige, el("figure", {}, [groot, onderschrift]), volgende]);
+      overlay.addEventListener("click", function (e) { if (e.target === overlay || e.target.tagName === "FIGURE") sluiten(); });
+      sluit.addEventListener("click", sluiten);
+      vorige.addEventListener("click", function () { ga(-1); });
+      volgende.addEventListener("click", function () { ga(1); });
+      overlay.addEventListener("touchstart", function (e) { startX = e.changedTouches[0].clientX; }, { passive: true });
+      overlay.addEventListener("touchend", function (e) {
+        if (startX === null) return;
+        var d = e.changedTouches[0].clientX - startX; startX = null;
+        if (Math.abs(d) > 50) ga(d < 0 ? 1 : -1);
+      }, { passive: true });
+      document.body.appendChild(overlay);
+    }
+    function toon() {
+      var f = groep[nu];
+      groot.src = f.currentSrc || f.src;
+      groot.alt = f.alt || "";
+      onderschrift.textContent = f.alt || "";
+      onderschrift.style.display = f.alt ? "" : "none";
+      overlay.classList.toggle("enkel", groep.length < 2);
+    }
+    function ga(stap) { nu = (nu + stap + groep.length) % groep.length; toon(); }
+    function open(img) {
+      if (!overlay) bouw();
+      var bron = img.closest(".gallery") || document.getElementById("bloemwerk-lijst") || document.body;
+      groep = [].slice.call(bron.querySelectorAll("img.vergroot"));
+      nu = Math.max(0, groep.indexOf(img));
+      terugnaar = img;
+      toon();
+      overlay.hidden = false;
+      document.body.classList.add("lb-open");
+      overlay.querySelector(".lb-sluit").focus();
+    }
+    function sluiten() {
+      if (!overlay || overlay.hidden) return;
+      overlay.hidden = true;
+      document.body.classList.remove("lb-open");
+      if (terugnaar) terugnaar.focus();
+    }
+    document.addEventListener("click", function (e) {
+      var img = e.target.closest && e.target.closest("img.vergroot");
+      if (img) open(img);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (overlay && !overlay.hidden) {
+        if (e.key === "Escape") sluiten();
+        else if (e.key === "ArrowLeft") ga(-1);
+        else if (e.key === "ArrowRight") ga(1);
+        return;
+      }
+      if ((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("vergroot")) { e.preventDefault(); open(e.target); }
+    });
+  })();
 })();
