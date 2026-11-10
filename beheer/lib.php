@@ -33,10 +33,12 @@ function schrijf_json($pad, $data) {
 function bewaar_pad($pad, $naam, $data) {
     if (!is_dir(DATA . '/backup')) @mkdir(DATA . '/backup', 0755, true);
     if (is_file($pad)) {
-        @copy($pad, DATA . "/backup/$naam-" . date('Ymd-His') . '.json');
+        // twee wijzigingen in dezelfde seconde krijgen elk een eigen bestand
+        $stempel = date('Ymd-His'); $nr = count(glob(DATA . "/backup/$naam-$stempel*.json") ?: []) + 1;
+        @copy($pad, DATA . "/backup/$naam-$stempel-" . str_pad((string)$nr, 3, '0', STR_PAD_LEFT) . '.json');
         $oud = glob(DATA . "/backup/$naam-*.json") ?: [];
         sort($oud);
-        while (count($oud) > 30) { @unlink(array_shift($oud)); }
+        while (count($oud) > 80) { @unlink(array_shift($oud)); }
     }
     schrijf_json($pad, $data);
 }

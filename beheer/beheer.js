@@ -1,3 +1,9 @@
+// Menu op een smal scherm
+(function () {
+  var k = document.querySelector(".b-menuknop"); if (!k) return;
+  k.addEventListener("click", function () { var o = document.body.classList.toggle("b-menu-open"); k.setAttribute("aria-expanded", o ? "true" : "false"); });
+})();
+
 // Waarschuwt in het beheer als er wijzigingen zijn die nog niet zijn opgeslagen.
 (function () {
   var formulieren = [].filter.call(document.querySelectorAll("form.b-form"), function (f) {

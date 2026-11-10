@@ -3,6 +3,7 @@
 // Zelfde opzet als het beheer van pimmolemaker.nl: eigen inlog, tweede stap (app), reservekopieën.
 require __DIR__ . '/lib.php';
 require __DIR__ . '/tweestap.php';
+require __DIR__ . '/versies.php';
 
 $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
 ini_set('session.use_strict_mode', '1');
@@ -63,18 +64,46 @@ p{margin:0 0 1rem}.c{font-size:.95rem;color:#5b6a80}a{color:#c9473a}
 ';
 }
 
+// Welk menu-item hoort bij welke actie (zodat het juiste item gemarkeerd wordt)
+function nav_actief($a, $l = '') {
+    $lijstActies = ['lijst', 'item', 'item-omhoog', 'item-omlaag'];
+    if ($a === '') return 'start';
+    if ($a === 'teksten' || $a === 'tekst') return 'teksten';
+    if ($a === 'categorieen' || (in_array($a, $lijstActies, true) && $l === 'bloemwerk')) return 'bloemwerk';
+    if ($a === 'workshops' || (in_array($a, $lijstActies, true) && strpos($l, 'ws-') === 0)) return 'workshops';
+    if ($a === 'groei' || (in_array($a, $lijstActies, true) && strpos($l, 'gb-') === 0)) return 'groei';
+    if ($a === 'versies' || $a === 'versie-terug') return 'versies';
+    if (in_array($a, ['instellingen', 'wachtwoord', 'tweestap-start', 'tweestap-instellen', 'tweestap-bevestig', 'tweestap-herstel', 'tweestap-uit', 'voorbeeld-uit'], true)) return 'instellingen';
+    return $a;
+}
+
+function beheer_menu($a, $l = '') {
+    $groepen = [
+        '' => [['start', '', 'Start']],
+        'Inhoud' => [['bloemwerk', '?a=lijst&l=bloemwerk', 'Bloemwerk'], ['teksten', '?a=teksten', 'Teksten van de pagina\'s'], ['workshops', '?a=workshops', 'Workshops'],
+                     ['groei', '?a=groei', 'Groei en Bloei'], ['media', '?a=media', 'Foto\'s']],
+        'Beheer' => [['versies', '?a=versies', 'Vorige versies'], ['instellingen', '?a=instellingen', 'Instellingen en veiligheid']],
+    ];
+    $actief = nav_actief($a, $l); $uit = '';
+    foreach ($groepen as $kop => $items) {
+        $uit .= '<div class="b-groep">' . ($kop !== '' ? '<p class="b-groepkop">' . e($kop) . '</p>' : '') . '<ul>';
+        foreach ($items as $it) $uit .= '<li><a href="/beheer/' . $it[1] . '"' . ($it[0] === $actief ? ' aria-current="page"' : '') . '>' . e($it[2]) . '</a></li>';
+        $uit .= '</ul></div>';
+    }
+    return $uit;
+}
+
 function kader($titel, $inhoud, $nav = true) {
     $m = '';
     if (!empty($_SESSION['melding'])) { list($t, $f) = $_SESSION['melding']; unset($_SESSION['melding']); $m = '<p class="melding' . ($f ? ' fout' : '') . '" role="status">' . e($t) . '</p>'; }
-    $menu = '';
-    if ($nav && ingelogd()) {
-        $menu = '<nav><a href="/beheer/">Start</a><a href="/beheer/?a=lijst&l=bloemwerk">Bloemwerk</a><a href="/beheer/?a=teksten">Teksten</a><a href="/beheer/?a=workshops">Workshops</a><a href="/beheer/?a=groei">Groei en Bloei</a>'
-              . '<a href="/beheer/?a=media">Foto\'s</a><a href="/beheer/?a=instellingen">Instellingen</a><a href="' . (is_offline() ? '/beheer/?a=voorbeeld' : '/') . '" target="_blank" rel="noopener">Bekijk site ↗</a>'
-              . '<form method="post" action="/beheer/?a=uitloggen">' . csrf_veld() . '<button>Uitloggen</button></form></nav>';
-    }
+    $ingelogd = $nav && ingelogd();
+    $kop = '<header class="b-kop">' . ($ingelogd ? '<button type="button" class="b-menuknop" aria-expanded="false" aria-controls="b-zij">Menu</button>' : '') . '<strong class="b-merk">Beheer Flor-Es</strong>'
+         . ($ingelogd ? '<span class="b-kop-rechts"><a href="' . (is_offline() ? '/beheer/?a=voorbeeld' : '/') . '" target="_blank" rel="noopener">Bekijk de site ↗</a><form method="post" action="/beheer/?a=uitloggen">' . csrf_veld() . '<button>Uitloggen</button></form></span>' : '') . '</header>';
+    $zij = $ingelogd ? '<nav id="b-zij" class="b-zij" aria-label="Beheer">' . beheer_menu($_GET['a'] ?? '', $_GET['l'] ?? '') . '</nav>' : '';
     echo '<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">'
-       . '<title>' . e($titel) . ' – Beheer Flor-Es</title><link rel="stylesheet" href="/beheer/beheer.css"></head><body>'
-       . '<header class="b-kop"><strong>Beheer Flor-Es</strong>' . $menu . '</header><main class="b-inhoud">' . $m . '<h1>' . e($titel) . '</h1>' . $inhoud . '</main><script src="/beheer/beheer.js?v=1" defer></script></body></html>';
+       . '<title>' . e($titel) . ' – Beheer Flor-Es</title><link rel="stylesheet" href="/beheer/beheer.css?v=2"></head><body' . ($ingelogd ? '' : ' class="b-los"') . '>'
+       . $kop . '<div class="b-lay">' . $zij . '<main class="b-inhoud" id="b-inhoud">' . $m . '<h1>' . e($titel) . '</h1>' . $inhoud . '</main></div>'
+       . '<script src="/beheer/beheer.js?v=2" defer></script></body></html>';
     exit;
 }
 
@@ -224,6 +253,7 @@ if ($a === 'lijst') {
             . '<a class="b-knop klein" href="/beheer/?a=item&l=' . e($l) . '&i=' . $i . '">Bewerken</a></td></tr>';
     }
     $extra = $l === 'bloemwerk' ? ' <a class="b-knop klein" style="background:#fff;color:var(--g);border:1px solid var(--g)" href="/beheer/?a=categorieen">Categorieën en inleidende teksten</a>' : '';
+    $extra .= ' <a href="/beheer/?a=versies&b=data:' . e($def['bestand']) . '">Vorige versies</a>';
     $terug = $def['terug'] ? '<p><a href="/beheer/?a=' . $def['terug'] . '">← Terug</a></p>' : '';
     kader($def['titel'], $terug . '<p><a class="b-knop" href="/beheer/?a=item&l=' . e($l) . '&i=nieuw">+ Nieuw ' . e($def['enkel']) . '</a>' . $extra . '</p>'
         . ($items ? '<table class="b-tabel">' . $rijen . '</table>' : '<p class="b-hulp">Er staat hier nog niets.</p>')
@@ -317,11 +347,12 @@ if ($a === 'categorieen') {
             . '<label>Inleidende tekst op de pagina Bloemwerk<textarea name="intro_' . $k . '" rows="3">' . e($c['intro'] ?? '') . '</textarea></label>'
             . '<label>Kopje boven de tekst onder de producten (niet verplicht)<input name="tekstkop_' . $k . '" value="' . e($c['tekstkop'] ?? '') . '"></label>'
             . '<label>Korte tekst onder de producten (niet verplicht; een nieuwe regel is een nieuwe alinea)<textarea name="werkwijze_' . $k . '" rows="6">' . e($c['werkwijze'] ?? '') . '</textarea></label>'
+            . '<details class="b-geavanceerd"><summary>Geavanceerd (zelden nodig): extra knop, knoptekst en verwijderen</summary><div class="b-gea">'
             . '<label>Extra knop onder de tekst: deze pagina openen (niet verplicht)<select name="knop2pagina_' . $k . '">' . knop_opties($c['knop2pagina'] ?? '') . '</select></label>'
             . '<label>Tekst op die extra knop (leeg = de naam van de pagina)<input name="knop2_' . $k . '" value="' . e($c['knop2'] ?? '') . '"></label>'
             . '<label>Tekst op de knop onder deze categorie (leeg = Wil je weten wat er mogelijk is? Neem contact op.)<input name="knop_' . $k . '" value="' . e($c['knop'] ?? '') . '"></label>'
             . ($n === 0 ? '<label class="b-aan"><input type="checkbox" name="weg_' . $k . '" value="1"> Deze categorie verwijderen (er staan geen producten in)</label>' : '<p class="b-hulp">' . $n . ' product' . ($n === 1 ? '' : 'en') . ' in deze categorie.</p>')
-            . '</fieldset>';
+            . '</div></details></fieldset>';
     }
     $f .= '<fieldset><legend>Nieuwe categorie toevoegen</legend><label>Naam<input name="nieuw_naam"></label><label>Inleidende tekst<textarea name="nieuw_intro" rows="3"></textarea></label><label>Kopje boven de tekst onder de producten (niet verplicht)<input name="nieuw_tekstkop"></label><label>Korte tekst onder de producten (niet verplicht)<textarea name="nieuw_werkwijze" rows="4"></textarea></label><label>Extra knop onder de tekst: deze pagina openen (niet verplicht)<select name="nieuw_knop2pagina">' . knop_opties('') . '</select></label><label>Tekst op die extra knop (leeg = de naam van de pagina)<input name="nieuw_knop2"></label><label>Tekst op de knop (leeg = standaard)<input name="nieuw_knop"></label></fieldset>'
         . '<p><button class="b-knop">Opslaan</button> <a href="/beheer/?a=lijst&l=bloemwerk">Terug naar de producten</a></p>'
@@ -357,20 +388,21 @@ function tekst_naar_html($t) {
     $h = preg_replace('~\*([^*\n]+)\*~', '<em>$1</em>', $h);
     return str_replace("\n", '<br>', $h);
 }
-function tekst_velden($naam) {
-    $html = (string)@file_get_contents(tekst_pad($naam));
+function tekst_velden_uit($html) {
     $v = [];
-    if (preg_match('~<title>(.*?)</title>~s', $html, $m)) $v[] = ['_titel', 'Webpagina::Titel (tabblad van de browser en Google)', 'kort', html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')];
-    if (preg_match('~<meta name="description" content="([^"]*)">~', $html, $m)) $v[] = ['_omschrijving', 'Webpagina::Korte omschrijving voor Google', 'lang', html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')];
-    if (preg_match_all(TEKST_PATROON, $html, $ms, PREG_SET_ORDER)) foreach ($ms as $m) $v[] = [$m[1], $m[2], $m[3], html_naar_tekst($m[4])];
+    if (preg_match('~<title>(.*?)</title>~s', $html, $m)) $v[] = ['_titel', 'Webpagina::Titel (tabblad van de browser en Google)', 'kort', html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'), $m[1]];
+    if (preg_match('~<meta name="description" content="([^"]*)">~', $html, $m)) $v[] = ['_omschrijving', 'Webpagina::Korte omschrijving voor Google', 'lang', html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'), $m[1]];
+    if (preg_match_all(TEKST_PATROON, $html, $ms, PREG_SET_ORDER)) foreach ($ms as $m) $v[] = [$m[1], $m[2], $m[3], html_naar_tekst($m[4]), $m[4]];
     return $v;
 }
+function tekst_velden($naam) { return tekst_velden_uit((string)@file_get_contents(tekst_pad($naam))); }
 function tekst_reservekopie($naam) {
     if (!is_dir(DATA . '/backup')) @mkdir(DATA . '/backup', 0755, true);
-    @copy(tekst_pad($naam), DATA . "/backup/pagina-$naam-" . date('Ymd-His') . '.html');
+    $stempel = date('Ymd-His'); $nr = count(glob(DATA . "/backup/pagina-$naam-$stempel*.html") ?: []) + 1; // twee wijzigingen in één seconde krijgen elk een eigen bestand
+    @copy(tekst_pad($naam), DATA . "/backup/pagina-$naam-$stempel-" . str_pad((string)$nr, 3, '0', STR_PAD_LEFT) . '.html');
     $oud = glob(DATA . "/backup/pagina-$naam-*.html") ?: [];
     sort($oud);
-    while (count($oud) > 30) { @unlink(array_shift($oud)); }
+    while (count($oud) > 80) { @unlink(array_shift($oud)); }
 }
 
 if ($a === 'teksten') {
@@ -398,7 +430,7 @@ if ($a === 'tekst') {
         rename($tmp, tekst_pad($n));
         melding('Opgeslagen. De wijzigingen staan meteen op de site.'); ga('tekst', '&p=' . $n);
     }
-    $f = '<p><a href="/beheer/?a=teksten">← Alle pagina\'s</a> · <a href="' . ($n === 'index' ? '/' : '/' . e($n) . '.html') . ($n === 'trouwambtenaar' ? '?voorbeeld=1' : '') . '" target="_blank" rel="noopener">Bekijk de pagina ↗</a></p>'
+    $f = '<p><a href="/beheer/?a=teksten">← Alle pagina\'s</a> · <a href="' . ($n === 'index' ? '/' : '/' . e($n) . '.html') . ($n === 'trouwambtenaar' ? '?voorbeeld=1' : '') . '" target="_blank" rel="noopener">Bekijk de pagina ↗</a> · <a href="/beheer/?a=versies&b=pagina:' . e($n) . '">Vorige versies</a></p>'
         . '<form method="post" class="b-form" action="/beheer/?a=tekst&p=' . e($n) . '">' . csrf_veld()
         . '<p class="b-hulp">Zet een woord tussen sterretjes, bijvoorbeeld <code>*karakter*</code>, om het schuin (en op de homepage ook gekleurd) te tonen. Een nieuwe regel blijft een nieuwe regel. Links, foto\'s en de volgorde van de teksten staan vast.</p>';
     $wijzer = ['bloemwerk' => 'De categorieën (zoals Bruidswerk en Rouwwerk) met hun inleidende tekst, en alle producten met omschrijving en prijs, pas je aan bij <a href="/beheer/?a=lijst&l=bloemwerk">Bloemwerk</a> en <a href="/beheer/?a=categorieen">Categorieën en inleidende teksten</a>.',
@@ -406,19 +438,26 @@ if ($a === 'tekst') {
         'groei-en-bloei' => 'De agenda en de foto\'s pas je aan bij <a href="/beheer/?a=groei">Groei en Bloei</a>.',
         'contact' => 'Het e-mailadres, telefoonnummer en de plaats pas je aan bij <a href="/beheer/?a=instellingen">Instellingen</a>.'];
     if (isset($wijzer[$n])) $f .= '<p class="melding">' . $wijzer[$n] . '</p>';
-    $vorige = null;
+    $blokken = [];   // aaneengesloten velden met dezelfde sectienaam horen bij elkaar
     foreach ($velden as $v) {
         list($k, $label, $soort, $tekst) = $v;
         $delen = explode('::', $label, 2); $sectie = $delen[0]; $naam = $delen[1] ?? $delen[0];
-        if ($sectie !== $vorige) { if ($vorige !== null) $f .= '</fieldset>'; $f .= '<fieldset><legend>' . e($sectie) . '</legend>'; $vorige = $sectie; }
-        $f .= '<label>' . e($naam) . ($soort === 'lang'
+        $veld = '<label>' . e($naam) . ($soort === 'lang'
             ? '<textarea name="t_' . e($k) . '" rows="' . max(3, min(9, (int)ceil(mb_strlen($tekst) / 70) + 1)) . '">' . e($tekst) . '</textarea>'
             : '<input name="t_' . e($k) . '" value="' . e($tekst) . '">') . '</label>';
+        if ($blokken && $blokken[count($blokken) - 1][0] === $sectie) $blokken[count($blokken) - 1][1] .= $veld; else $blokken[] = [$sectie, $veld];
     }
-    if ($vorige !== null) $f .= '</fieldset>';
+    $webpagina = '';
+    foreach ($blokken as $bl) {
+        if ($bl[0] === 'Webpagina') $webpagina .= $bl[1];
+        else $f .= '<fieldset><legend>' . e($bl[0]) . '</legend>' . $bl[1] . '</fieldset>';
+    }
+    if ($webpagina !== '') $f .= '<details class="b-geavanceerd"><summary>Geavanceerd (zelden nodig): titel en omschrijving voor Google</summary><div class="b-gea">' . $webpagina . '</div></details>';
     $f .= '<p><button class="b-knop">Opslaan</button> <a href="/beheer/?a=teksten">Annuleren</a></p></form>';
     kader('Teksten: ' . TEKSTPAGINAS[$n], $f);
 }
+
+versies_route($a, $post);
 
 /* ---------- Foto's ---------- */
 if ($a === 'media') {
@@ -477,7 +516,7 @@ if ($a === 'instellingen') {
         . '<p class="b-hulp">Staat dit aan, dan zien bezoekers alleen een pagina met deze tekst (en je e-mailadres en telefoonnummer, als je die hebt ingevuld). Het beheer blijft gewoon werken. Via <strong>Bekijk site</strong> bovenin zie je zelf nog wel de hele site. ' . (is_offline() ? '<a href="/beheer/?a=voorbeeld-uit">Zie de site zoals bezoekers hem zien</a>.' : '') . '</p></fieldset>';
     kader('Instellingen', (is_offline() ? '<p class="melding fout">De website staat nu <strong>offline</strong>. Bezoekers zien alleen een melding.</p>' : '') . '<form method="post" class="b-form" action="/beheer/?a=instellingen">' . csrf_veld() . $offlineBlok
         . '<fieldset><legend>Contactgegevens op de site</legend>' . $f('email', 'E-mailadres', $open['email'] ?? '', 'email') . $f('telefoon', 'Telefoonnummer', $open['telefoon'] ?? '') . $f('plaats', 'Plaats of regio', $open['plaats'] ?? '') . '</fieldset>'
-        . '<fieldset><legend>Onderaan elke pagina</legend>' . $f('voet', 'Korte tekst onder de naam Flor-Es', $open['voet'] ?? '') . $f('kleinedruk', 'Kleine regel helemaal onderaan (leeg = © 2026 Flor-Es)', $open['kleinedruk'] ?? '') . '</fieldset>'
+        . '<details class="b-geavanceerd"><summary>Geavanceerd (zelden nodig): tekst onderaan elke pagina</summary><div class="b-gea">' . $f('voet', 'Korte tekst onder de naam Flor-Es', $open['voet'] ?? '') . $f('kleinedruk', 'Kleine regel helemaal onderaan (leeg = © 2026 Flor-Es)', $open['kleinedruk'] ?? '') . '</div></details>'
         . '<fieldset><legend>Contactformulier</legend>' . $f('ontvanger', 'Berichten uit het contactformulier komen binnen op dit e-mailadres', $prive['ontvanger'] ?? '', 'email')
         . $f('afzender', 'Afzenderadres (een adres van je eigen domein, anders komt de mail vaak in de spam)', $prive['afzender'] ?? '', 'email') . '</fieldset>'
         . '<fieldset><legend>Pagina Trouwambtenaar</legend><label class="b-aan"><input type="checkbox" name="live" value="1"' . (!empty($open['trouwambtenaarLive']) ? ' checked' : '') . '> Pagina Trouwambtenaar zichtbaar op de site en in het menu</label>'
@@ -496,12 +535,20 @@ if ($a === 'wachtwoord' && $post) {
 }
 
 /* ---------- Startpagina ---------- */
-$mailwaarschuwing = (lees_prive('site')['ontvanger'] ?? '') === '' ? '<p class="melding fout">Let op: er is nog geen e-mailadres ingesteld voor het contactformulier. <a href="/beheer/?a=instellingen">Doe dat nu</a>, anders komen berichten niet aan.</p>' : '';
-kader('Welkom', (is_offline() ? '<p class="melding fout">De website staat nu <strong>offline</strong>. Bezoekers zien alleen een melding. <a href="/beheer/?a=instellingen">Zet hem weer online bij Instellingen</a>.</p>' : '') . $mailwaarschuwing . '<div class="b-start">'
+/* ---------- Startpagina ---------- */
+$todo = [];
+if ((lees_prive('site')['ontvanger'] ?? '') === '') $todo[] = ['Er is nog geen e-mailadres ingesteld voor het contactformulier, dus berichten komen niet aan.', '/beheer/?a=instellingen', 'Instellen'];
+if (is_offline()) $todo[] = ['De hele website staat offline. Bezoekers zien alleen een melding.', '/beheer/?a=instellingen', 'Online zetten'];
+if (!tweestap_aan()) $todo[] = ['Tweestapsverificatie staat nog uit. Dat maakt het beheer veel veiliger.', '/beheer/?a=instellingen', 'Instellen'];
+$zonderFoto = 0; foreach (lees('bloemwerk')['producten'] ?? [] as $pr) if (trim((string)($pr['foto'] ?? '')) === '') $zonderFoto++;
+if ($zonderFoto) $todo[] = [$zonderFoto . ' product' . ($zonderFoto === 1 ? ' heeft' : 'en hebben') . ' nog geen foto.', '/beheer/?a=lijst&l=bloemwerk', 'Bekijken'];
+$ins = lees('instellingen');
+if (trim((string)($ins['email'] ?? '')) === '' || trim((string)($ins['telefoon'] ?? '')) === '') $todo[] = ['De contactgegevens op de site (e-mailadres of telefoonnummer) zijn nog niet allemaal ingevuld.', '/beheer/?a=instellingen', 'Invullen'];
+$lijst = '';
+foreach ($todo as $t) $lijst .= '<li><span>' . e($t[0]) . '</span> <a class="b-knop klein" href="' . e($t[1]) . '">' . e($t[2]) . '</a></li>';
+kader('Welkom', '<h2 class="b-h2">Nu te doen</h2>' . ($lijst ? '<ul class="b-todo">' . $lijst . '</ul>' : '<p class="melding">Alles is bijgewerkt. Er is niets dat op je wacht.</p>')
+    . '<h2 class="b-h2">Snel aan de slag</h2><div class="b-start">'
     . '<a href="/beheer/?a=item&l=bloemwerk&i=nieuw"><strong>Nieuw product</strong><span>Bijvoorbeeld een corsage of bloemstuk</span></a>'
-    . '<a href="/beheer/?a=lijst&l=bloemwerk"><strong>Bloemwerk</strong><span>' . aantal('bloemwerk', 'producten') . ' producten</span></a>'
-    . '<a href="/beheer/?a=teksten"><strong>Teksten</strong><span>De teksten op alle pagina\'s</span></a>'
-    . '<a href="/beheer/?a=workshops"><strong>Workshops</strong><span>Foto\'s, prijzen, referenties</span></a>'
-    . '<a href="/beheer/?a=groei"><strong>Groei en Bloei</strong><span>Agenda en foto\'s</span></a>'
-    . '<a href="/beheer/?a=media"><strong>Foto\'s</strong><span>Uploaden en opruimen</span></a>'
-    . '<a href="/beheer/?a=instellingen"><strong>Instellingen</strong><span>Contactgegevens, wachtwoord, tweede stap</span></a></div>');
+    . '<a href="/beheer/?a=teksten"><strong>Een tekst aanpassen</strong><span>De teksten op alle pagina\'s</span></a>'
+    . '<a href="/beheer/?a=media"><strong>Foto\'s uploaden</strong><span>Toevoegen en opruimen</span></a>'
+    . '<a href="/beheer/?a=item&l=gb-agenda&i=nieuw"><strong>Workshop in de agenda</strong><span>Groei en Bloei</span></a></div>');
