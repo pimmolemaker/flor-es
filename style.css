@@ -5,6 +5,8 @@
   --navy-soft: #4a5a75;
   --coral: #e4604f;
   --coral-dark: #c9473a;
+  --knop: #e9a3b4;        /* zachtrozerood van de knoppen, afgeleid van de roos in het logo */
+  --knop-hover: #df8da1;
   --pink: #f4b6ad;
   --pink-soft: #fceeeb;
   --cream: #fffaf8;
@@ -77,12 +79,12 @@ p { margin: 0 0 1.1em; }
 /* Knoppen */
 .btn {
   display: inline-block; text-decoration: none; cursor: pointer;
-  background: var(--coral); color: var(--white) !important;
+  background: var(--knop); color: var(--navy) !important;
   padding: .85rem 1.9rem; border-radius: 999px; border: 0;
   font: inherit; font-weight: 500; letter-spacing: .02em;
   transition: background .2s, transform .2s;
 }
-.btn:hover { background: var(--coral-dark); transform: translateY(-1px); }
+.btn:hover { background: var(--knop-hover); transform: translateY(-1px); }
 .btn.outline { background: transparent; color: var(--navy) !important; border: 1.5px solid var(--navy); }
 .btn.outline:hover { background: var(--navy); color: var(--white) !important; }
 .btn.small { padding: .55rem 1.3rem; font-size: .95rem; }

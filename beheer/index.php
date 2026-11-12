@@ -546,7 +546,7 @@ if ($a === 'wachtwoord' && $post) {
 /* ---------- Startpagina ---------- */
 /* ---------- Startpagina ---------- */
 $todo = [];
-if (migratie_nodig()) $todo[] = ['Een update van de pagina\'s staat klaar: Trouwen op maat heet voortaan Trouwplanner, met een knop op de homepage.', '/beheer/?a=migratie', 'Bekijken'];
+if (migratie_nodig()) $todo[] = ['Een update van de pagina\'s staat klaar (Trouwplanner en de knoppen op de homepage). Bekijk wat er verandert.', '/beheer/?a=migratie', 'Bekijken'];
 if ((lees_prive('site')['ontvanger'] ?? '') === '') $todo[] = ['Er is nog geen e-mailadres ingesteld voor het contactformulier, dus berichten komen niet aan.', '/beheer/?a=instellingen', 'Instellen'];
 if (is_offline()) $todo[] = ['De hele website staat offline. Bezoekers zien alleen een melding.', '/beheer/?a=instellingen', 'Online zetten'];
 if (!tweestap_aan()) $todo[] = ['Tweestapsverificatie staat nog uit. Dat maakt het beheer veel veiliger.', '/beheer/?a=instellingen', 'Instellen'];

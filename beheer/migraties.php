@@ -3,7 +3,7 @@
 // Elke update is veilig om vaker uit te voeren: wat al is bijgewerkt, wordt overgeslagen.
 
 // Trouwen op maat heet voortaan Trouwplanner: nieuwe naam en adres, verwijzingen, en een knop op de homepage.
-function migratie_trouwplanner_pagina($naam, $html) {
+function migratie_trouwplanner_pagina($naam, $html, $metKnoppen = true) {
     $nieuw = preg_replace('~href="trouwen-op-maat\.html~', 'href="trouwplanner.html', $html);
     // Alleen teksten die nog precies de oude naam hebben; teksten die zijn aangepast blijven zoals ze zijn
     $nieuw = preg_replace_callback(TEKST_PATROON, function ($m) use ($naam) {
@@ -15,13 +15,29 @@ function migratie_trouwplanner_pagina($naam, $html) {
     }, $nieuw);
     $nieuw = str_replace('<title>Trouwen op maat | Flor-Es</title>', '<title>Trouwplanner | Flor-Es</title>', $nieuw);
     if ($naam === 'contact') $nieuw = str_replace('<option>Trouwen op maat</option>', '<option>Trouwplanner</option>', $nieuw);
-    if ($naam === 'index' && strpos($nieuw, 'Tekst op de knop 3|') === false) {
-        preg_match_all('~<!--t:k(\d+)\|~', $nieuw, $ks);
-        $volgende = $ks[1] ? max(array_map('intval', $ks[1])) + 1 : 1;
-        $knop = '<a class="btn outline" href="trouwplanner.html"><!--t:k' . sprintf('%02d', $volgende) . '|Bovenaan de pagina::Tekst op de knop 3|kort-->Trouwplanner<!--/t--></a>';
-        $nieuw = preg_replace_callback('~<a class="btn outline" href="over\.html">.*?</a>~s', function ($m) use ($knop) { return $m[0] . "\n        " . $knop; }, $nieuw, 1);
-    }
+    if ($naam === 'index' && $metKnoppen) $nieuw = migratie_hero_knoppen($nieuw);
     return $nieuw;
+}
+
+// De knoppen bovenaan de homepage: Bekijk bloemwerk, Trouwplanner, Maak kennis (teksten die zijn aangepast blijven staan).
+function migratie_hero_knoppen($html) {
+    if (!preg_match('~<div class="btn-row">(.*?)</div>~s', $html, $m, PREG_OFFSET_CAPTURE)) return $html;
+    preg_match_all('~<a [^>]*>.*?</a>~s', $m[1][0], $as);
+    $bloem = $over = $tp = null;
+    foreach ($as[0] as $a) {
+        if (strpos($a, 'href="bloemwerk.html"') !== false) $bloem = $a;
+        elseif (strpos($a, 'href="over.html"') !== false) $over = $a;
+        elseif (strpos($a, 'href="trouwplanner.html"') !== false) $tp = $a;
+    }
+    if ($bloem === null || $over === null) return $html;   // onbekende opbouw: niet aanraken
+    if ($tp === null) {
+        preg_match_all('~<!--t:k(\d+)\|~', $html, $ks);
+        $volgende = $ks[1] ? max(array_map('intval', $ks[1])) + 1 : 1;
+        $tp = '<a class="btn outline" href="trouwplanner.html"><!--t:k' . sprintf('%02d', $volgende) . '|Bovenaan de pagina::Tekst op de knop 2|kort-->Trouwplanner<!--/t--></a>';
+    }
+    $nummer = function ($a, $n) { return preg_replace('~(<!--t:k\d+\|Bovenaan de pagina::Tekst op de knop )\d~', '${1}' . $n, $a); };
+    $binnen = "\n        " . $nummer($bloem, 1) . "\n        " . $nummer($tp, 2) . "\n        " . $nummer($over, 3) . "\n      ";
+    return substr($html, 0, $m[1][1]) . $binnen . substr($html, $m[1][1] + strlen($m[1][0]));
 }
 
 // Geeft een lijst met wat er verandert. Met $uitvoeren = true wordt het ook gedaan (met eerst een reservekopie van elke pagina).
@@ -42,7 +58,10 @@ function migratie_trouwplanner($uitvoeren) {
         if (!is_file($pad)) continue;
         $html = (string)file_get_contents($pad); $nieuw = migratie_trouwplanner_pagina($naam, $html);
         if ($nieuw === $html) continue;
-        $wijzigingen[] = 'Pagina ' . TEKSTPAGINAS[$naam] . ': de naam Trouwplanner en de verwijzingen worden bijgewerkt' . ($naam === 'index' && strpos($html, 'Tekst op de knop 3|') === false ? ', en er komt een knop Trouwplanner bij de knoppen bovenaan' : '') . '.';
+        $zonder = migratie_trouwplanner_pagina($naam, $html, false); $delen = [];
+        if ($zonder !== $html) $delen[] = 'de naam Trouwplanner en de verwijzingen worden bijgewerkt';
+        if ($naam === 'index' && migratie_hero_knoppen($zonder) !== $zonder) $delen[] = 'de knoppen bovenaan komen in de volgorde Bekijk bloemwerk, Trouwplanner, Maak kennis';
+        $wijzigingen[] = 'Pagina ' . TEKSTPAGINAS[$naam] . ': ' . implode(', en ', $delen) . '.';
         if ($uitvoeren) {
             if (strpos($nieuw, '<main>') === false || strpos($nieuw, '</main>') === false) throw new RuntimeException('Een pagina zou beschadigd raken. Er is niets meer gewijzigd.');
             tekst_reservekopie($naam);
