@@ -5,11 +5,10 @@
   --navy-soft: #4a5a75;
   --coral: #e4604f;
   --coral-dark: #c9473a;
-  --knop: #e9a3b4;        /* zachtrozerood van de knoppen, afgeleid van de roos in het logo */
-  --knop-hover: #df8da1;
   --pink: #f4b6ad;
-  --pink-soft: #fceeeb;
-  --cream: #fffaf8;
+  --pink-soft: #f6e3de;   /* vlakken met een tint, een tintje donkerder dan de pagina */
+  --cream: #fdf4f1;
+  --page: #faf1ee;        /* achtergrond van de pagina's */
   --line: #f0dcd7;
   --white: #ffffff;
   --radius: 18px;
@@ -21,7 +20,7 @@
 html { scroll-behavior: smooth; }
 body {
   margin: 0;
-  background: var(--white);
+  background: var(--page);
   color: var(--navy);
   font-family: var(--sans);
   font-size: 1.05rem;
@@ -62,7 +61,7 @@ p { margin: 0 0 1.1em; }
 /* Header */
 .site-header {
   position: sticky; top: 0; z-index: 20;
-  background: rgba(255,255,255,.94);
+  background: rgba(250,241,238,.94);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line);
 }
@@ -79,19 +78,19 @@ p { margin: 0 0 1.1em; }
 /* Knoppen */
 .btn {
   display: inline-block; text-decoration: none; cursor: pointer;
-  background: var(--knop); color: var(--navy) !important;
+  background: var(--coral); color: var(--white) !important;
   padding: .85rem 1.9rem; border-radius: 999px; border: 0;
   font: inherit; font-weight: 500; letter-spacing: .02em;
   transition: background .2s, transform .2s;
 }
-.btn:hover { background: var(--knop-hover); transform: translateY(-1px); }
+.btn:hover { background: var(--coral-dark); transform: translateY(-1px); }
 .btn.outline { background: transparent; color: var(--navy) !important; border: 1.5px solid var(--navy); }
 .btn.outline:hover { background: var(--navy); color: var(--white) !important; }
 .btn.small { padding: .55rem 1.3rem; font-size: .95rem; }
 .btn-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.6rem; }
 
 /* Hero (tweedeling) */
-.hero { overflow: hidden; padding: clamp(2.5rem, 6vw, 5rem) 0; background: linear-gradient(180deg, var(--cream), var(--white)); }
+.hero { overflow: hidden; padding: clamp(2.5rem, 6vw, 5rem) 0; background: linear-gradient(180deg, var(--cream), var(--page)); }
 .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(2rem, 6vw, 5rem); align-items: center; }
 .hero h1 em { font-style: italic; color: var(--coral); }
 .hero-art { position: relative; }
@@ -104,7 +103,7 @@ p { margin: 0 0 1.1em; }
   content: ""; position: absolute; inset: -6% -6% auto auto; width: 38%; aspect-ratio: 1;
   background: var(--pink); border-radius: 50%; z-index: -1; opacity: .55;
 }
-.page-hero { padding: clamp(3rem, 7vw, 5.5rem) 0 clamp(2rem, 4vw, 3rem); background: linear-gradient(180deg, var(--pink-soft), var(--white)); }
+.page-hero { padding: clamp(3rem, 7vw, 5.5rem) 0 clamp(2rem, 4vw, 3rem); background: linear-gradient(180deg, var(--pink-soft), var(--page)); }
 
 /* Kaarten */
 .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem; }
@@ -193,7 +192,7 @@ textarea { min-height: 150px; resize: vertical; }
 
 @media (max-width: 860px) {
   .menu-toggle { display: block; }
-  .nav ul { display: none; position: absolute; top: 76px; left: 0; right: 0; flex-direction: column; gap: 1rem; background: var(--white); padding: 1.5rem; border-bottom: 1px solid var(--line); }
+  .nav ul { display: none; position: absolute; top: 76px; left: 0; right: 0; flex-direction: column; gap: 1rem; background: var(--page); padding: 1.5rem; border-bottom: 1px solid var(--line); }
   .nav ul.open { display: flex; }
   .hero-grid, .split, .cards, .prices, .quotes, .foot-grid, .row2 { grid-template-columns: 1fr; }
   .split.reverse > :first-child { order: 0; }
@@ -237,7 +236,7 @@ body[data-niet-live]:not(.toon) main { visibility: hidden; }
 
 @media (max-width: 1000px) {
   .menu-toggle { display: block; }
-  .nav ul { display: none; position: absolute; top: 76px; left: 0; right: 0; flex-direction: column; align-items: flex-start; gap: 1rem; background: var(--white); padding: 1.5rem; border-bottom: 1px solid var(--line); }
+  .nav ul { display: none; position: absolute; top: 76px; left: 0; right: 0; flex-direction: column; align-items: flex-start; gap: 1rem; background: var(--page); padding: 1.5rem; border-bottom: 1px solid var(--line); }
   .nav ul.open { display: flex; }
 }
 @media (max-width: 860px) {
@@ -282,6 +281,8 @@ body.lb-open { overflow: hidden; }
   .lightbox img { max-height: calc(100vh - 12rem); }
 }
 
-/* Drie knoppen bovenaan de homepage naast elkaar */
+/* Drie knoppen bovenaan de homepage naast elkaar, alle drie gevuld */
 .hero .btn-row { gap: .8rem; }
-.hero .btn-row .btn { padding: .8rem 1.5rem; }
+.hero .btn-row .btn { padding: .8rem 1.5rem; border: 1.5px solid transparent; }
+.hero .btn-row .btn.outline { background: var(--coral); color: var(--white) !important; border-color: transparent; }
+.hero .btn-row .btn.outline:hover { background: var(--coral-dark); }
