@@ -4,7 +4,7 @@ Website van bloemiste Esther Leefoge. Gewone HTML, CSS en JavaScript, met een kl
 (dezelfde opzet als pimmolemaker.nl). Draait op Hostnet (PHP 7.4 of nieuwer, geen database).
 
 ## Pagina's
-`index`, `over`, `workshops`, `groei-en-bloei`, `bloemwerk`, `trouwen-op-maat`, `contact`
+`index`, `over`, `workshops`, `groei-en-bloei`, `bloemwerk`, `trouwplanner`, `contact`
 en de proefpagina `trouwambtenaar` (nog niet live, zie hieronder).
 
 ## 1. Uploaden naar Hostnet

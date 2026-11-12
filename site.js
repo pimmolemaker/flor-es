@@ -7,7 +7,7 @@
     ["bloemwerk.html", "Bloemwerk"],
     ["workshops.html", "Workshops"],
     ["groei-en-bloei.html", "Groei en Bloei"],
-    ["trouwen-op-maat.html", "Trouwen op maat"]
+    ["trouwplanner.html", "Trouwplanner"]
   ];
   var AMBTENAAR = ["trouwambtenaar.html", "Trouwambtenaar"];
 
@@ -146,6 +146,7 @@
         if (c.werkwijze || c.tekstkop || c.knop2pagina) {
           var alineas = String(c.werkwijze || "").split(/\n+/).filter(Boolean).map(function (t) { return el("p", { tekst: t }); });
           var extraknop = null;
+          if (c.knop2pagina === "trouwen-op-maat.html") c.knop2pagina = "trouwplanner.html";   // oude naam van de pagina
           if (c.knop2pagina && /^[\w-]+\.html$/.test(c.knop2pagina)) {
             var paginanaam = (PAGINAS.concat([["contact.html", "Contact"]]).filter(function (x) { return x[0] === c.knop2pagina; })[0] || [0, "Meer informatie"])[1];
             extraknop = el("p", { klasse: "btn-row" }, [el("a", { klasse: "btn small", href: c.knop2pagina, tekst: c.knop2 || paginanaam })]);
@@ -234,7 +235,7 @@
   var ONDERWERP_PER_PAGINA = {
     "workshops.html": "Workshop voor bedrijf, instelling of particulieren",
     "groei-en-bloei.html": "Workshop via Groei en Bloei",
-    "trouwen-op-maat.html": "Trouwen op maat"
+    "trouwplanner.html": "Trouwplanner"
   };
   if (ONDERWERP_PER_PAGINA[huidig]) {
     [].forEach.call(document.querySelectorAll(".cta a.btn"), function (a) {
@@ -253,7 +254,7 @@
       kies.insertBefore(uitleg, kies.firstChild);
       kies.required = true;
       var gewenst = (params.get("onderwerp") || "").trim();
-      var alias = { "projecten": "Bloemwerk voor een project", "boeketten op bestelling": "Boeket op bestelling" };
+      var alias = { "projecten": "Bloemwerk voor een project", "boeketten op bestelling": "Boeket op bestelling", "trouwen op maat": "Trouwplanner" };
       var doel = alias[gewenst.toLowerCase()] || gewenst;
       var gevonden = null;
       [].forEach.call(kies.options, function (o) { if (doel && o.value && o.text.toLowerCase() === doel.toLowerCase()) gevonden = o; });

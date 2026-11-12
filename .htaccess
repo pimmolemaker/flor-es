@@ -12,6 +12,9 @@ RewriteCond %{REQUEST_URI} !^/(beheer/|offline\.html$|img/logo\.jpg$)
 RewriteRule ^ - [R=503,L]
 ErrorDocument 503 /offline.html
 
+# Trouwen op maat heet voortaan Trouwplanner: het oude adres stuurt door
+Redirect 301 /trouwen-op-maat.html /trouwplanner.html
+
 DirectoryIndex index.html index.php
 
 # Snellere pagina's door caching van afbeeldingen, css en js

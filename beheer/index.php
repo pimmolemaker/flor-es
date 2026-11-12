@@ -4,6 +4,7 @@
 require __DIR__ . '/lib.php';
 require __DIR__ . '/tweestap.php';
 require __DIR__ . '/versies.php';
+require __DIR__ . '/migraties.php';
 
 $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
 ini_set('session.use_strict_mode', '1');
@@ -73,6 +74,7 @@ function nav_actief($a, $l = '') {
     if ($a === 'workshops' || (in_array($a, $lijstActies, true) && strpos($l, 'ws-') === 0)) return 'workshops';
     if ($a === 'groei' || (in_array($a, $lijstActies, true) && strpos($l, 'gb-') === 0)) return 'groei';
     if ($a === 'versies' || $a === 'versie-terug') return 'versies';
+    if ($a === 'migratie' || $a === 'migratie-uitvoeren') return 'start';
     if (in_array($a, ['instellingen', 'wachtwoord', 'tweestap-start', 'tweestap-instellen', 'tweestap-bevestig', 'tweestap-herstel', 'tweestap-uit', 'voorbeeld-uit'], true)) return 'instellingen';
     return $a;
 }
@@ -310,11 +312,12 @@ if ($a === 'item') {
 
 /* ---------- Categorieën van het bloemwerk ---------- */
 function knop_opties($gekozen) {
+    if ($gekozen === 'trouwen-op-maat.html') $gekozen = 'trouwplanner.html';   // oude naam van de pagina
     $o = '<option value="">Geen extra knop</option>';
     foreach (KNOPPAGINAS as $f => $naam) $o .= '<option value="' . e($f) . '"' . ($f === $gekozen ? ' selected' : '') . '>' . e($naam) . '</option>';
     return $o;
 }
-const KNOPPAGINAS = ['trouwen-op-maat.html' => 'Trouwen op maat', 'over.html' => 'Over', 'workshops.html' => 'Workshops', 'groei-en-bloei.html' => 'Groei en Bloei', 'contact.html' => 'Contact'];
+const KNOPPAGINAS = ['trouwplanner.html' => 'Trouwplanner', 'over.html' => 'Over', 'workshops.html' => 'Workshops', 'groei-en-bloei.html' => 'Groei en Bloei', 'contact.html' => 'Contact'];
 if ($a === 'categorieen') {
     $data = lees('bloemwerk'); $cats = $data['categorieen'] ?? []; $prods = $data['producten'] ?? [];
     $aantal_in = function ($naam) use ($prods) { return count(array_filter($prods, function ($x) use ($naam) { return ($x['categorie'] ?? '') === $naam; })); };
@@ -374,10 +377,15 @@ if ($a === 'groei') overzicht('Groei en Bloei', [['gb-agenda', 'Agenda', aantal(
 // De teksten staan in de pagina's zelf, tussen markeringen <!--t:sleutel|sectie::naam|kort/lang-->tekst<!--/t-->.
 // Het beheer leest die markeringen en schrijft de tekst terug. Voor elke wijziging wordt een reservekopie van de pagina bewaard.
 const TEKSTPAGINAS = ['index' => 'Home', 'over' => 'Over', 'bloemwerk' => 'Bloemwerk', 'workshops' => 'Workshops', 'groei-en-bloei' => 'Groei en Bloei',
-    'trouwen-op-maat' => 'Trouwen op maat', 'trouwambtenaar' => 'Trouwambtenaar (proefpagina)', 'contact' => 'Contact'];
+    'trouwplanner' => 'Trouwplanner', 'trouwambtenaar' => 'Trouwambtenaar (proefpagina)', 'contact' => 'Contact'];
 const TEKST_PATROON = '~<!--t:([a-z0-9]+)\|([^|]*?)\|(kort|lang)-->(.*?)<!--/t-->~s';
 
-function tekst_pad($naam) { return BASIS . '/' . $naam . '.html'; }
+function tekst_pad($naam) {
+    $p = BASIS . '/' . $naam . '.html';
+    // zolang de pagina nog niet is hernoemd (zie Pagina's bijwerken) werkt het beheer met het oude bestand
+    if ($naam === 'trouwplanner' && !is_file($p) && is_file(BASIS . '/trouwen-op-maat.html')) return BASIS . '/trouwen-op-maat.html';
+    return $p;
+}
 function html_naar_tekst($h) {
     $h = preg_replace('~<br\s*/?>~i', "\n", $h);
     $h = preg_replace('~<em>(.*?)</em>~s', '*$1*', $h);
@@ -458,6 +466,7 @@ if ($a === 'tekst') {
 }
 
 versies_route($a, $post);
+migraties_route($a, $post);
 
 /* ---------- Foto's ---------- */
 if ($a === 'media') {
@@ -537,6 +546,7 @@ if ($a === 'wachtwoord' && $post) {
 /* ---------- Startpagina ---------- */
 /* ---------- Startpagina ---------- */
 $todo = [];
+if (migratie_nodig()) $todo[] = ['Een update van de pagina\'s staat klaar: Trouwen op maat heet voortaan Trouwplanner, met een knop op de homepage.', '/beheer/?a=migratie', 'Bekijken'];
 if ((lees_prive('site')['ontvanger'] ?? '') === '') $todo[] = ['Er is nog geen e-mailadres ingesteld voor het contactformulier, dus berichten komen niet aan.', '/beheer/?a=instellingen', 'Instellen'];
 if (is_offline()) $todo[] = ['De hele website staat offline. Bezoekers zien alleen een melding.', '/beheer/?a=instellingen', 'Online zetten'];
 if (!tweestap_aan()) $todo[] = ['Tweestapsverificatie staat nog uit. Dat maakt het beheer veel veiliger.', '/beheer/?a=instellingen', 'Instellen'];
